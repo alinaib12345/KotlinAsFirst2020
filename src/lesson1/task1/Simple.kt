@@ -135,6 +135,5 @@ fun numberRevert(number: Int): Int {
     val two = number / 10 % 10
     val three = number % 10
     return one + two * 10 + three * 100
-
 }
 
