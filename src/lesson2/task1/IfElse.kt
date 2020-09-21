@@ -119,10 +119,15 @@ fun whichRookThreatens(
     rookX1: Int, rookY1: Int,
     rookX2: Int, rookY2: Int
 ): Int {
+    val k: Boolean = kingX == rookX1
+    val l: Boolean = kingY == rookY1
+    val m: Boolean = kingX == rookX2
+    val n: Boolean = kingY == rookY2
+
     return when {
-        (kingX == rookX1 || kingY == rookY1) && (kingX == rookX2 || kingY == rookY2) -> 3
-        (kingX != rookX1 && kingY != rookY1) && (kingX == rookX2 || kingY == rookY2) -> 2
-        (kingX == rookX1 || kingY == rookY1) && (kingX != rookX2 && kingY != rookY2) -> 1
+        (k || l) && (m || n) -> 3
+        (!k || !l) && (m || n) -> 2
+        (k || l) && (!m || !n) -> 1
         else -> 0
     }
 }
@@ -142,10 +147,14 @@ fun rookOrBishopThreatens(
     rookX: Int, rookY: Int,
     bishopX: Int, bishopY: Int
 ): Int {
+    val k: Boolean = kingX == rookX
+    val l: Boolean = kingY == rookY
+    val m: Int = abs(kingX - bishopX)
+    val n: Int = abs(kingY - bishopY)
     return when {
-        (kingX == rookX || kingY == rookY) && (abs(kingX - bishopX) == abs(kingY - bishopY)) -> 3
-        (kingX != rookX && kingY != rookY) && (abs(kingX - bishopX) == abs(kingY - bishopY)) -> 2
-        (kingX == rookX || kingY == rookY) && (abs(kingX - bishopX) != abs(kingY - bishopY)) -> 1
+        (k || l) && (m == n) -> 3
+        (!k && !l) && (m == n) -> 2
+        (k || l) && (m != n) -> 1
         else -> 0
     }
 }
@@ -169,11 +178,10 @@ fun triangleKind(a: Double, b: Double, c: Double): Int = TODO()
  * Если пересечения нет, вернуть -1.
  */
 fun segmentLength(a: Int, b: Int, c: Int, d: Int): Int {
+    val max: Int = maxOf(a, c)
+    val min: Int = minOf(b, d)
     return when {
-        (a >= c && d >= b && b >= c) -> (b - a)
-        (a <= c && d >= b && b >= c) -> (b - c)
-        (a >= c && d <= b && d >= a) -> (d - a)
-        (a <= c && d <= b) -> (d - c)
+        b >= c && d >= a -> abs(max - min)
         else -> -1
     }
 }
