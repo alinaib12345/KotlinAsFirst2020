@@ -119,13 +119,15 @@ fun whichRookThreatens(
     rookX1: Int, rookY1: Int,
     rookX2: Int, rookY2: Int
 ): Int {
-    val firstRook: Boolean = kingX == rookX1 || kingY == rookY1
-    val secondRook: Boolean = kingX == rookX2 || kingY == rookY2
+    val k: Boolean = kingX == rookX1
+    val l: Boolean = kingY == rookY1
+    val m: Boolean = kingX == rookX2
+    val n: Boolean = kingY == rookY2
 
     return when {
-        firstRook && secondRook -> 3
-        !firstRook && secondRook -> 2
-        firstRook && !secondRook -> 1
+        (k || l) && (m || n) -> 3
+        (!k || !l) && (m || n) -> 2
+        (k || l) && (!m || !n) -> 1
         else -> 0
     }
 }
@@ -145,12 +147,14 @@ fun rookOrBishopThreatens(
     rookX: Int, rookY: Int,
     bishopX: Int, bishopY: Int
 ): Int {
-    val rookThreat: Boolean = kingX == rookX || kingY == rookY
-    val bishopThreat: Boolean = abs(kingX - bishopX) == abs(kingY - bishopY)
+    val k: Boolean = kingX == rookX
+    val l: Boolean = kingY == rookY
+    val m: Int = abs(kingX - bishopX)
+    val n: Int = abs(kingY - bishopY)
     return when {
-        rookThreat && bishopThreat -> 3
-        !rookThreat && bishopThreat -> 2
-        rookThreat && !bishopThreat -> 1
+        (k || l) && (m == n) -> 3
+        (!k && !l) && (m == n) -> 2
+        (k || l) && (m != n) -> 1
         else -> 0
     }
 }
