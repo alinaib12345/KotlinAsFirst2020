@@ -91,11 +91,12 @@ fun digitNumber(n: Int): Int {
  * Ряд Фибоначчи определён следующим образом: fib(1) = 1, fib(2) = 1, fib(n+2) = fib(n) + fib(n+1)
  */
 fun fib(n: Int): Int {
-    val first = 1
+    var first = 1
     var second = 0
     var finalSequence = 0
     for (i in 1..n) {
         finalSequence = first + second
+        first = second
         second = finalSequence
     }
     return finalSequence
@@ -248,11 +249,8 @@ fun squareSequenceDigit(n: Int): Int {
     var needNumber = 0
     while (k < n) {
         needNumber++
-        while (needNumber > 0) {
-            k++
-            needNumber / 10
+        k += digitNumber(sqr(needNumber))
         }
-    }
     return (sqr(needNumber) / 10.0.pow(k - n) % 10).toInt()
 }
 
