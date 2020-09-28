@@ -3,6 +3,7 @@
 package lesson3.task1
 
 import lesson1.task1.sqr
+import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -76,7 +77,7 @@ fun digitCountInNumber(n: Int, m: Int): Int =
  */
 fun digitNumber(n: Int): Int {
     var k = 0
-    var z = n
+    var z = abs(n)
     do {
         k++
         z /= 10
@@ -250,7 +251,7 @@ fun squareSequenceDigit(n: Int): Int {
     while (k < n) {
         needNumber++
         k += digitNumber(sqr(needNumber))
-        }
+    }
     return (sqr(needNumber) / 10.0.pow(k - n) % 10).toInt()
 }
 
