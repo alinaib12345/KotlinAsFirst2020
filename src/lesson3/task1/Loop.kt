@@ -2,6 +2,8 @@
 
 package lesson3.task1
 
+import lesson1.task1.sqr
+import kotlin.math.pow
 import kotlin.math.sqrt
 
 // Урок 3: циклы
@@ -72,7 +74,15 @@ fun digitCountInNumber(n: Int, m: Int): Int =
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun digitNumber(n: Int): Int = TODO()
+fun digitNumber(n: Int): Int {
+    var k = 0
+    var z = 0
+    do {
+        k++
+        z /= 10
+    } while (n > 0)
+    return k
+}
 
 /**
  * Простая (2 балла)
@@ -80,21 +90,43 @@ fun digitNumber(n: Int): Int = TODO()
  * Найти число Фибоначчи из ряда 1, 1, 2, 3, 5, 8, 13, 21, ... с номером n.
  * Ряд Фибоначчи определён следующим образом: fib(1) = 1, fib(2) = 1, fib(n+2) = fib(n) + fib(n+1)
  */
-fun fib(n: Int): Int = TODO()
+fun fib(n: Int): Int {
+    val first = 1
+    var second = 0
+    var finalSequence = 0
+    for (i in 1..n) {
+        finalSequence = first + second
+        second = finalSequence
+    }
+    return finalSequence
+}
 
 /**
  * Простая (2 балла)
  *
  * Для заданного числа n > 1 найти минимальный делитель, превышающий 1
  */
-fun minDivisor(n: Int): Int = TODO()
-
+fun minDivisor(n: Int): Int {
+    var min = 1
+    for (i in 2..sqrt(n.toDouble()).toInt()) {
+        if (n % i == 0) min = i
+        if (min > 1) break
+    }
+    if (min == 1) return n
+    return min
+}
 /**
  * Простая (2 балла)
  *
  * Для заданного числа n > 1 найти максимальный делитель, меньший n
  */
-fun maxDivisor(n: Int): Int = TODO()
+fun maxDivisor(n: Int): Int {
+    var max = 1
+    for (i in 2..n / 2) {
+        if (n % i == 0) max = i
+    }
+    return max
+}
 
 /**
  * Простая (2 балла)
@@ -147,7 +179,17 @@ fun squareBetweenExists(m: Int, n: Int): Boolean = TODO()
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun revert(n: Int): Int = TODO()
+fun revert(n: Int): Int {
+    var number = 0
+    var change = n
+    var digit: Int
+    while (change > 0) {
+        digit = change % 10
+        number = 10 * number + digit
+        change /= 10
+    }
+    return number
+}
 
 /**
  * Средняя (3 балла)
@@ -201,7 +243,18 @@ fun cos(x: Double, eps: Double): Double = TODO()
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun squareSequenceDigit(n: Int): Int = TODO()
+fun squareSequenceDigit(n: Int): Int {
+    var k = 0
+    var needNumber = 0
+    while (k < n) {
+        needNumber++
+        while (needNumber > 0) {
+            k++
+            needNumber / 10
+        }
+    }
+    return (sqr(needNumber) / 10.0.pow(k - n) % 10).toInt()
+}
 
 /**
  * Сложная (5 баллов)
@@ -212,4 +265,13 @@ fun squareSequenceDigit(n: Int): Int = TODO()
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun fibSequenceDigit(n: Int): Int = TODO()
+fun fibSequenceDigit(n: Int): Int {
+    var k = 0
+    var needNumber = 0
+    while (k < n) {
+        needNumber++
+        k += digitNumber(fib(needNumber))
+    }
+    return (fib(needNumber) / 10.0.pow(k - n) % 10).toInt()
+}
+
