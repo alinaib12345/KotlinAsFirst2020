@@ -186,7 +186,7 @@ fun revert(n: Int): Int {
     var number = 0
     var change = n
     while (change > 0) {
-        var digit = change % 10
+        val digit = change % 10
         number = 10 * number + digit
         change /= 10
     }
