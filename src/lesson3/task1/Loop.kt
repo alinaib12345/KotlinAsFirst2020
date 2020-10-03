@@ -2,6 +2,7 @@
 
 package lesson3.task1
 
+import com.sun.webkit.dom.NamedNodeMapImpl
 import lesson1.task1.sqr
 import kotlin.math.abs
 import kotlin.math.pow
@@ -109,14 +110,14 @@ fun fib(n: Int): Int {
  * Для заданного числа n > 1 найти минимальный делитель, превышающий 1
  */
 fun minDivisor(n: Int): Int {
-    var min = 1
     for (i in 2..sqrt(n.toDouble()).toInt()) {
-        if (n % i == 0) min = i
-        if (min > 1) break
+        if (n % i == 0) {
+            return i
+        }
     }
-    if (min == 1) return n
-    return min
+    return n
 }
+
 /**
  * Простая (2 балла)
  *
@@ -124,7 +125,7 @@ fun minDivisor(n: Int): Int {
  */
 fun maxDivisor(n: Int): Int {
     var max = 1
-    for (i in 2..n / 2) {
+    for (i in n / 2 downTo 2) {
         if (n % i == 0) max = i
     }
     return max
@@ -184,9 +185,8 @@ fun squareBetweenExists(m: Int, n: Int): Boolean = TODO()
 fun revert(n: Int): Int {
     var number = 0
     var change = n
-    var digit: Int
     while (change > 0) {
-        digit = change % 10
+        var digit = change % 10
         number = 10 * number + digit
         change /= 10
     }
@@ -236,6 +236,9 @@ fun sin(x: Double, eps: Double): Double = TODO()
  */
 fun cos(x: Double, eps: Double): Double = TODO()
 
+// function for squareSequenceDigit and fibSequenceDigit //
+fun sequences(need: Int, k: Int, n: Int): Int = (need / 10.0.pow(k - n) % 10).toInt()
+
 /**
  * Сложная (4 балла)
  *
@@ -252,7 +255,7 @@ fun squareSequenceDigit(n: Int): Int {
         needNumber++
         k += digitNumber(sqr(needNumber))
     }
-    return (sqr(needNumber) / 10.0.pow(k - n) % 10).toInt()
+    return sequences(sqr(needNumber), k, n)
 }
 
 /**
@@ -271,6 +274,6 @@ fun fibSequenceDigit(n: Int): Int {
         needNumber++
         k += digitNumber(fib(needNumber))
     }
-    return (fib(needNumber) / 10.0.pow(k - n) % 10).toInt()
+    return sequences(fib(needNumber), k, n)
 }
 
