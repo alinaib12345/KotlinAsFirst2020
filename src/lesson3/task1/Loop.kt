@@ -2,7 +2,6 @@
 
 package lesson3.task1
 
-import com.sun.webkit.dom.NamedNodeMapImpl
 import lesson1.task1.sqr
 import kotlin.math.abs
 import kotlin.math.pow
@@ -236,7 +235,20 @@ fun sin(x: Double, eps: Double): Double = TODO()
 fun cos(x: Double, eps: Double): Double = TODO()
 
 // function for squareSequenceDigit and fibSequenceDigit //
-fun sequences(need: Int, k: Int, n: Int): Int = (need / 10.0.pow(k - n) % 10).toInt()
+fun sequences(flag: Int, n: Int): Int {
+    var k = 0
+    var needNumber = 1
+    var operacion = 1
+    while (k < n) {
+        operacion = when (flag) {
+            0 -> sqr(needNumber)
+            else -> fib(needNumber)
+        }
+        k += digitNumber(operacion)
+        needNumber++
+    }
+    return (operacion / 10.0.pow(k - n) % 10).toInt()
+}
 
 /**
  * Сложная (4 балла)
@@ -247,15 +259,7 @@ fun sequences(need: Int, k: Int, n: Int): Int = (need / 10.0.pow(k - n) % 10).to
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun squareSequenceDigit(n: Int): Int {
-    var k = 0
-    var needNumber = 0
-    while (k < n) {
-        needNumber++
-        k += digitNumber(sqr(needNumber))
-    }
-    return sequences(sqr(needNumber), k, n)
-}
+fun squareSequenceDigit(n: Int): Int = sequences(0, n)
 
 /**
  * Сложная (5 баллов)
@@ -266,15 +270,11 @@ fun squareSequenceDigit(n: Int): Int {
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun fibSequenceDigit(n: Int): Int {
-    var k = 0
-    var needNumber = 0
-    while (k < n) {
-        needNumber++
-        k += digitNumber(fib(needNumber))
-    }
-    return sequences(fib(needNumber), k, n)
-}
+fun fibSequenceDigit(n: Int): Int = sequences(1, n)
+
+
+
+
 
 
 
