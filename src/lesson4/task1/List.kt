@@ -338,7 +338,7 @@ fun russian(n: Int): String {
                 5, 6, 7, 8, 9 -> finalPhrase.add(one[digit - 1] + " тысяч")
                 1 -> finalPhrase.add("одна тысяча")
                 2 -> finalPhrase.add("две тысячи")
-                3, 4 -> finalPhrase.add(one[digit - 1] + "тысячи")
+                3, 4 -> finalPhrase.add(one[digit - 1] + " тысячи")
                 0 -> finalPhrase.add("тысяч")
             }
         }
