@@ -347,7 +347,7 @@ fun russian(n: Int): String {
                 0 -> finalPhrase.add("тысяч")
             }
         }
-        lenght = digitNumber(number)
+        lenght--
     }
     var final = finalPhrase.joinToString(separator = " ")
     val teens = listOf(
