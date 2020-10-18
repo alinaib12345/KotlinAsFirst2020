@@ -286,8 +286,8 @@ fun roman(n: Int): String {
     var number = n
     var lenght = digitNumber(number)
     for (j in digitNumber(n) downTo 0) {
-        val x = number / 10.0.pow((digitNumber(number) - 1).toDouble()).toInt()
-        number %= 10.0.pow((digitNumber(number) - 1).toDouble()).toInt()
+        val x = number / 10.0.pow((lenght - 1).toDouble()).toInt()
+        number %= 10.0.pow((lenght - 1).toDouble()).toInt()
         var i = 0
         when (lenght) {
             1 -> i = 1
@@ -305,7 +305,6 @@ fun roman(n: Int): String {
             7 -> romanNumber.append(alphabet[i], alphabet[i - 1], alphabet[i - 1])
             8 -> romanNumber.append(alphabet[i], alphabet[i - 1], alphabet[i - 1], alphabet[i - 1])
             9 -> romanNumber.append(alphabet[i - 1], alphabet[i + 1])
-            else -> ""
         }
         lenght = digitNumber(number)
     }
@@ -333,8 +332,8 @@ fun russian(n: Int): String {
     var number = n
     var lenght = digitNumber(number)
     for (j in digitNumber(n) downTo 1) {
-        val digit = number / 10.0.pow((digitNumber(number) - 1).toDouble()).toInt()
-        number %= 10.0.pow((digitNumber(number) - 1).toDouble()).toInt()
+        val digit = number / 10.0.pow((lenght - 1).toDouble()).toInt()
+        number %= 10.0.pow((lenght - 1).toDouble()).toInt()
         when (lenght) {
             1 -> if (digit != 0) finalPhrase.add(one[digit - 1])
             2, 5 -> if (digit != 0) finalPhrase.add(ten[digit - 1])
