@@ -3,7 +3,6 @@
 package lesson4.task1
 
 import lesson1.task1.discriminant
-import lesson1.task1.sqr
 import lesson3.task1.digitNumber
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -138,13 +137,11 @@ fun abs(v: List<Double>): Double {
  */
 fun mean(list: List<Double>): Double {
     var sum = 0.0
-    var count = 0
     for (i in list) {
         sum += i
-        count++
     }
-    return if (count == 0) 0.0
-    else sum / count
+    return if (list.isEmpty()) 0.0
+    else sum / list.size
 }
 
 /**
@@ -285,16 +282,10 @@ fun roman(n: Int): String {
     val romanNumber = StringBuilder()
     var number = n
     var lenght = digitNumber(number)
-    for (j in digitNumber(n) downTo 0) {
+    for (j in lenght downTo 0) {
         val x = number / 10.0.pow((lenght - 1).toDouble()).toInt()
         number %= 10.0.pow((lenght - 1).toDouble()).toInt()
-        var i = 0
-        when (lenght) {
-            1 -> i = 1
-            2 -> i = 3
-            3 -> i = 5
-            4 -> i = 7
-        }
+        val i = 2 * lenght - 1
         when (x) {
             1 -> romanNumber.append(alphabet[i - 1])
             2 -> romanNumber.append(alphabet[i - 1], alphabet[i - 1])
@@ -329,7 +320,7 @@ fun russian(n: Int): String {
     )
     var number = n
     var lenght = digitNumber(number)
-    for (j in digitNumber(n) downTo 1) {
+    for (j in lenght downTo 1) {
         val digit = number / 10.0.pow((lenght - 1).toDouble()).toInt()
         number %= 10.0.pow((lenght - 1).toDouble()).toInt()
         when (lenght) {
