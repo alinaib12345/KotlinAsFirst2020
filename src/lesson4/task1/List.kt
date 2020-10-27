@@ -281,11 +281,12 @@ fun roman(n: Int): String {
     val alphabet = listOf<Char>('I', 'V', 'X', 'L', 'C', 'D', 'M')
     val romanNumber = StringBuilder()
     var number = n
-    var lenght = digitNumber(number)
-    for (j in lenght downTo 0) {
-        val x = number / 10.0.pow((lenght - 1).toDouble()).toInt()
-        number %= 10.0.pow((lenght - 1).toDouble()).toInt()
-        val i = 2 * lenght - 1
+    var length = digitNumber(number)
+    for (j in length downTo 0) {
+        val tensDegree = 10.0.pow((length - 1).toDouble()).toInt()
+        val x = number / tensDegree
+        number %= tensDegree
+        val i = 2 * length - 1
         when (x) {
             1 -> romanNumber.append(alphabet[i - 1])
             2 -> romanNumber.append(alphabet[i - 1], alphabet[i - 1])
@@ -297,7 +298,7 @@ fun roman(n: Int): String {
             8 -> romanNumber.append(alphabet[i], alphabet[i - 1], alphabet[i - 1], alphabet[i - 1])
             9 -> romanNumber.append(alphabet[i - 1], alphabet[i + 1])
         }
-        lenght = digitNumber(number)
+        length = digitNumber(number)
     }
     return romanNumber.toString()
 }
@@ -319,11 +320,12 @@ fun russian(n: Int): String {
         "сто", "двести", "триста", "четыреста", "пятьсот", "шестьсот", "семьсот", "восемьсот", "девятьсот"
     )
     var number = n
-    var lenght = digitNumber(number)
-    for (j in lenght downTo 1) {
-        val digit = number / 10.0.pow((lenght - 1).toDouble()).toInt()
-        number %= 10.0.pow((lenght - 1).toDouble()).toInt()
-        when (lenght) {
+    var length = digitNumber(number)
+    for (j in length downTo 1) {
+        val tensDegree = 10.0.pow((length - 1).toDouble()).toInt()
+        val digit = number / tensDegree
+        number %= tensDegree
+        when (length) {
             1 -> if (digit != 0) finalPhrase.add(one[digit - 1])
             2, 5 -> if (digit != 0) finalPhrase.add(ten[digit - 1])
             3, 6 -> if (digit != 0) finalPhrase.add(hundred[digit - 1])
@@ -335,7 +337,7 @@ fun russian(n: Int): String {
                 0 -> finalPhrase.add("тысяч")
             }
         }
-        lenght--
+        length--
     }
     var final = finalPhrase.joinToString(separator = " ")
     val teens = listOf(
