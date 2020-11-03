@@ -2,6 +2,9 @@
 
 package lesson5.task1
 
+import ru.spbstu.wheels.sorted
+import kotlin.math.max
+
 // Урок 5: ассоциативные массивы и множества
 // Максимальное количество баллов = 14
 // Рекомендуемое количество баллов = 9
@@ -96,7 +99,15 @@ fun buildWordSet(text: List<String>): MutableSet<String> {
  *   buildGrades(mapOf("Марат" to 3, "Семён" to 5, "Михаил" to 5))
  *     -> mapOf(5 to listOf("Семён", "Михаил"), 3 to listOf("Марат"))
  */
-fun buildGrades(grades: Map<String, Int>): Map<Int, List<String>> = TODO()
+fun buildGrades(grades: Map<String, Int>): Map<Int, List<String>> {
+    val students: MutableMap<Int, MutableList<String>> = mutableMapOf()
+    for ((name, mark) in grades) {
+        if (students[mark] == null)
+            students[mark] = mutableListOf()
+        students[mark]!!.add(name)
+    }
+    return students
+}
 
 /**
  * Простая (2 балла)
@@ -108,7 +119,12 @@ fun buildGrades(grades: Map<String, Int>): Map<Int, List<String>> = TODO()
  *   containsIn(mapOf("a" to "z"), mapOf("a" to "z", "b" to "sweet")) -> true
  *   containsIn(mapOf("a" to "z"), mapOf("a" to "zee", "b" to "sweet")) -> false
  */
-fun containsIn(a: Map<String, String>, b: Map<String, String>): Boolean = TODO()
+fun containsIn(a: Map<String, String>, b: Map<String, String>): Boolean {
+    for (k in a.keys) {
+        if (a[k] != b[k]) return false
+    }
+    return true
+}
 
 /**
  * Простая (2 балла)
@@ -277,7 +293,17 @@ fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<Stri
  *   findSumOfTwo(listOf(1, 2, 3), 4) -> Pair(0, 2)
  *   findSumOfTwo(listOf(1, 2, 3), 6) -> Pair(-1, -1)
  */
-fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> = TODO()
+fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
+    val meaning = mutableMapOf<Int, Int>()
+    for (i in list.indices) {
+        meaning[i] = list[i]
+    }
+    for (i in list.indices) {
+        if (meaning.containsValue(number - meaning[i]!!) && list.indexOf(number - meaning[i]!!) != i)
+            return Pair(i, list.indexOf(number - meaning[i]!!)).sorted()
+    }
+    return Pair(-1, -1)
+}
 
 /**
  * Очень сложная (8 баллов)
@@ -300,4 +326,35 @@ fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> = TODO()
  *     450
  *   ) -> emptySet()
  */
-fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<String> = TODO()
+fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<String> {
+    if (treasures.isEmpty()) return emptySet()
+    val weights = mutableListOf<Int>()
+    val cost = mutableListOf<Int>()
+    val names = mutableListOf<String>()
+    for ((key, values) in treasures) {
+        weights += values.first
+        cost += values.second
+        names += key
+    }
+    val bag = Array(names.size + 1) { Array(capacity + 1) { 0 } }
+    for (i in 1..names.size) {
+        for (k in 1..capacity) {
+            if (k >= weights[i - 1]) bag[i][k] =
+                max(bag[i - 1][k], bag[i - 1][k - weights[i - 1]] + cost[i - 1])
+            else bag[i][k] = bag[i - 1][k]
+        }
+    }
+    val treasure = mutableSetOf<String>()
+    fun search(i: Int, k: Int): Int {
+        if (bag[i][k] == 0) return 0
+        if (bag[i - 1][k] == bag[i][k]) search(i - 1, k)
+        else {
+            search(i - 1, k - weights[i - 1])
+            treasure += names[i - 1]
+        }
+        return 0
+    }
+    search(treasures.size, capacity)
+    return treasure
+}
+
