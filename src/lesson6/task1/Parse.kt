@@ -2,6 +2,10 @@
 
 package lesson6.task1
 
+import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
+
+
 // Урок 6: разбор строк, исключения
 // Максимальное количество баллов = 13
 // Рекомендуемое количество баллов = 11
@@ -114,7 +118,17 @@ fun flattenPhoneNumber(phone: String): String = TODO()
  * Прочитать строку и вернуть максимальное присутствующее в ней число (717 в примере).
  * При нарушении формата входной строки или при отсутствии в ней чисел, вернуть -1.
  */
-fun bestLongJump(jumps: String): Int = TODO()
+fun bestLongJump(jumps: String): Int {
+    return if (jumps.matches(Regex("""^((\d+|%|-) )*(\d+|%|-)$"""))) {
+        val parts = Regex("""(\s + |%|-)*""").replace(jumps, "").split(" ")
+        var maxJump = -1
+        for (part in parts) {
+            if (part.toIntOrNull() != null && part.toInt() > maxJump)
+                maxJump = part.toInt()
+        }
+        maxJump
+    } else -1
+}
 
 /**
  * Сложная (6 баллов)
@@ -149,7 +163,17 @@ fun plusMinus(expression: String): Int = TODO()
  * Вернуть индекс начала первого повторяющегося слова, или -1, если повторов нет.
  * Пример: "Он пошёл в в школу" => результат 9 (индекс первого 'в')
  */
-fun firstDuplicateIndex(str: String): Int = TODO()
+fun firstDuplicateIndex(str: String): Int {
+    val words = str.split(" ")
+    var j = 0
+    for (i in 0 until words.size - 1) {
+        if (words[i].toLowerCase() == words[i + 1].toLowerCase()) {
+            return j
+        }
+        j += words[i].length + 1
+    }
+    return -1
+}
 
 /**
  * Сложная (6 баллов)
@@ -162,7 +186,20 @@ fun firstDuplicateIndex(str: String): Int = TODO()
  * или пустую строку при нарушении формата строки.
  * Все цены должны быть больше нуля либо равны нулю.
  */
-fun mostExpensive(description: String): String = TODO()
+fun mostExpensive(description: String): String {
+    return if (description.matches(Regex("""([^\s]+\s\d+(\.\d+)?;\s)*[^\s]+\s\d+(\.\d+)?$"""))) {
+        val parts = description.split(" ", ";")
+        var max = -1.0
+        var res = -1
+        for (i in 1 until parts.size step 2) {
+            if (parts[i].toDoubleOrNull() != null && parts[i].toDouble() > max) {
+                max = parts[i].toDouble()
+                res = i
+            }
+        }
+        parts[res - 1]
+    } else ""
+}
 
 /**
  * Сложная (6 баллов)
@@ -213,4 +250,48 @@ fun fromRoman(roman: String): Int = TODO()
  * IllegalArgumentException должен бросаться даже если ошибочная команда не была достигнута в ходе выполнения.
  *
  */
-fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> = TODO()
+fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
+    val set = setOf(' ', '<', '>', '+', '-', '[', ']')
+    for (i in commands.indices) {
+        if (!set.contains(commands[i]))
+            throw IllegalArgumentException()
+    }
+    var k = 0
+    for (char in commands) {
+        if (char == '[') k++
+        if (char == ']') k--
+    }
+    if (k != 0) throw IllegalArgumentException()
+    val c = mutableListOf<Int>()
+    val open = mutableMapOf<Int, Int>()
+    val close = mutableMapOf<Int, Int>()
+    for ((index, value) in commands.withIndex()) {
+        if (value == '[') {
+            c += index
+        }
+        if (value == ']') {
+            if (c.isEmpty()) throw IllegalArgumentException()
+            open += c.last() to index
+            close += index to c.last()
+            c -= c.last()
+        }
+    }
+    var place = cells / 2
+    var lim = limit
+    var i = 0
+    val conveyor = Array(cells) { 0 }.toMutableList()
+    while (lim > 0 && i <= commands.length - 1) {
+        when (commands[i]) {
+            '>' -> if (place + 1 < cells) place++ else throw IllegalStateException()
+            '<' -> if (place - 1 >= 0) place-- else throw IllegalStateException()
+            '+' -> conveyor[place]++
+            '-' -> conveyor[place]--
+            '[' -> if (conveyor[place] == 0) i = open[i]!!
+            ']' -> if (conveyor[place] != 0) i = close[i]!!
+        }
+
+        i++
+        lim--
+    }
+    return conveyor
+}
