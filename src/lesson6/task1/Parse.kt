@@ -119,12 +119,13 @@ fun flattenPhoneNumber(phone: String): String = TODO()
  * При нарушении формата входной строки или при отсутствии в ней чисел, вернуть -1.
  */
 fun bestLongJump(jumps: String): Int {
-    return if (jumps.matches(Regex("""^((\d+|%|-) )*(\d+|%|-)$"""))) {
-        val parts = Regex("""(\s + |%|-)*""").replace(jumps, "").split(" ")
+    return if (jumps.matches(Regex("""((\d+|%|-)\s?)+"""))) {
+        val parts = Regex("""(\s |%|-)+""").replace(jumps, "").split(" ")
         var maxJump = -1
         for (part in parts) {
-            if (part.toIntOrNull() != null && part.toInt() > maxJump)
-                maxJump = part.toInt()
+            val jump = part.toIntOrNull()
+            if (jump != null && jump > maxJump)
+                maxJump = jump
         }
         maxJump
     } else -1
@@ -187,13 +188,14 @@ fun firstDuplicateIndex(str: String): Int {
  * Все цены должны быть больше нуля либо равны нулю.
  */
 fun mostExpensive(description: String): String {
-    return if (description.matches(Regex("""([^\s]+\s\d+(\.\d+)?;\s)*[^\s]+\s\d+(\.\d+)?$"""))) {
+    return if (description.matches(Regex("""([^\s]+\s\d+(\.\d+)?;?\s?)+"""))) {
         val parts = description.split(" ", ";")
         var max = -1.0
         var res = -1
         for (i in 1 until parts.size step 2) {
-            if (parts[i].toDoubleOrNull() != null && parts[i].toDouble() > max) {
-                max = parts[i].toDouble()
+            val cost = parts[i].toDoubleOrNull()
+            if (cost != null && cost > max) {
+                max = cost
                 res = i
             }
         }
@@ -253,15 +255,9 @@ fun fromRoman(roman: String): Int = TODO()
 fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
     val set = setOf(' ', '<', '>', '+', '-', '[', ']')
     for (i in commands.indices) {
-        if (!set.contains(commands[i]))
+        if (commands[i] !in set)
             throw IllegalArgumentException()
     }
-    var k = 0
-    for (char in commands) {
-        if (char == '[') k++
-        if (char == ']') k--
-    }
-    if (k != 0) throw IllegalArgumentException()
     val c = mutableListOf<Int>()
     val open = mutableMapOf<Int, Int>()
     val close = mutableMapOf<Int, Int>()
@@ -276,6 +272,7 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
             c -= c.last()
         }
     }
+    if (c.isNotEmpty()) throw IllegalArgumentException()
     var place = cells / 2
     var lim = limit
     var i = 0
