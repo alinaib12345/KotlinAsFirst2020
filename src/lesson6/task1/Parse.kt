@@ -194,7 +194,7 @@ fun mostExpensive(description: String): String {
         var res = -1
         for (i in 1 until parts.size step 2) {
             val cost = parts[i].toDoubleOrNull()
-            if (cost != null && cost > 0.0 && cost > max) {
+            if (cost != null && cost >= 0.0 && cost > max) {
                 max = cost
                 res = i
             }
