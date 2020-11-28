@@ -2,7 +2,10 @@
 
 package lesson7.task1
 
+import lesson3.task1.digitNumber
 import java.io.File
+import java.util.*
+import kotlin.math.pow
 
 // Урок 7: работа с файлами
 // Урок интегральный, поэтому его задачи имеют сильно увеличенную стоимость
@@ -63,7 +66,18 @@ fun alignFile(inputName: String, lineLength: Int, outputName: String) {
  * Подчёркивание в середине и/или в конце строк значения не имеет.
  */
 fun deleteMarked(inputName: String, outputName: String) {
-    TODO()
+    val writer = File(outputName).bufferedWriter()
+    val reader = File(inputName).bufferedReader()
+    reader.forEachLine { line ->
+        if (line.isNotEmpty()) {
+            if (line[0] != '_') {
+                writer.write(line)
+                writer.newLine()
+            }
+        } else writer.newLine()
+    }
+    writer.close()
+    reader.close()
 }
 
 /**
@@ -75,8 +89,28 @@ fun deleteMarked(inputName: String, outputName: String) {
  * Регистр букв игнорировать, то есть буквы е и Е считать одинаковыми.
  *
  */
-fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> = TODO()
+fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> {
+    val res = mutableMapOf<String, Int>()
+    val substring = substrings.toSet()
+    for (i in substring) {
+        res[i] = 0
+    }
+    for (line in File(inputName).readLines()) {
+        for (listString in res.keys) {
+            if (line.toLowerCase().contains(listString.toLowerCase())) {
+                for (char in 0..line.length - listString.length) {
+                    var check = 0
+                    for ((l, j) in (char until char + listString.length).withIndex()) {
+                        if (line.toLowerCase()[j] != listString.toLowerCase()[l]) check = 1
+                    }
+                    if (check == 0) res[listString] = res[listString]!! + 1
+                }
+            }
 
+        }
+    }
+    return res
+}
 
 /**
  * Средняя (12 баллов)
@@ -92,7 +126,7 @@ fun countSubstrings(inputName: String, substrings: List<String>): Map<String, In
  *
  */
 fun sibilants(inputName: String, outputName: String) {
-    TODO()
+
 }
 
 /**
@@ -268,21 +302,70 @@ Suspendisse ~~et elit in enim tempus iaculis~~.
  *
  * Соответствующий выходной файл:
 <html>
-    <body>
-        <p>
-            Lorem ipsum <i>dolor sit amet</i>, consectetur <b>adipiscing</b> elit.
-            Vestibulum lobortis. <s>Est vehicula rutrum <i>suscipit</i></s>, ipsum <s>lib</s>ero <i>placerat <b>tortor</b></i>.
-        </p>
-        <p>
-            Suspendisse <s>et elit in enim tempus iaculis</s>.
-        </p>
-    </body>
+<body>
+<p>
+Lorem ipsum <i>dolor sit amet</i>, consectetur <b>adipiscing</b> elit.
+Vestibulum lobortis. <s>Est vehicula rutrum <i>suscipit</i></s>, ipsum <s>lib</s>ero <i>placerat <b>tortor</b></i>.
+</p>
+<p>
+Suspendisse <s>et elit in enim tempus iaculis</s>.
+</p>
+</body>
 </html>
  *
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
-    TODO()
+    File(outputName).bufferedWriter().use {
+        val stackk = Stack<String>()
+        var emptiness = false
+        it.write("<html><body>")
+        it.write("<p>")
+        stackk.push("</p>")
+        for (line in File(inputName).readLines()) {
+            if (emptiness) {
+                it.write("<p>")
+                stackk.push("</p>")
+            }
+            if (line.isEmpty()) {
+                emptiness = true
+                while (stackk.isNotEmpty()) {
+                    it.write(stackk.lastElement())
+                    stackk.pop()
+                }
+            }
+            var j = 0
+            var formattedStr = line
+            while (formattedStr.contains("~~")) {
+                formattedStr = formattedStr.replaceFirst("~~", "<s>")
+                formattedStr = formattedStr.replaceFirst("~~", "</s>")
+            }
+            while (j < line.length) {
+                if (line[j] == '*' && line[j + 1] == '*' && !stackk.contains("</b>")) {
+                    formattedStr = formattedStr.replaceFirst("**", "<b>")
+                    stackk.push("</b>")
+                    j++
+                } else if (line[j] == '*' && line[j + 1] == '*' && stackk.contains("</b>")) {
+                    formattedStr = formattedStr.replaceFirst("**", stackk.lastElement())
+                    stackk.pop()
+                    j++
+                } else if (line[j] == '*' && line[j + 1] != '*' && !stackk.contains("</i>")) {
+                    formattedStr = formattedStr.replaceFirst("*", "<i>")
+                    stackk.push("</i>")
+                } else if (line[j] == '*' && line[j + 1] != '*' && stackk.contains("</i>")) {
+                    formattedStr = formattedStr.replaceFirst("*", stackk.lastElement())
+                    stackk.pop()
+                }
+                j++
+            }
+            it.write(formattedStr)
+        }
+        while (stackk.isNotEmpty()) {
+            it.write(stackk.lastElement())
+            stackk.pop()
+        }
+        it.write("</body></html>")
+    }
 }
 
 /**
@@ -319,65 +402,65 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
  *
  * Пример входного файла:
 ///////////////////////////////начало файла/////////////////////////////////////////////////////////////////////////////
-* Утка по-пекински
-    * Утка
-    * Соус
-* Салат Оливье
-    1. Мясо
-        * Или колбаса
-    2. Майонез
-    3. Картофель
-    4. Что-то там ещё
-* Помидоры
-* Фрукты
-    1. Бананы
-    23. Яблоки
-        1. Красные
-        2. Зелёные
+ * Утка по-пекински
+ * Утка
+ * Соус
+ * Салат Оливье
+1. Мясо
+ * Или колбаса
+2. Майонез
+3. Картофель
+4. Что-то там ещё
+ * Помидоры
+ * Фрукты
+1. Бананы
+23. Яблоки
+1. Красные
+2. Зелёные
 ///////////////////////////////конец файла//////////////////////////////////////////////////////////////////////////////
  *
  *
  * Соответствующий выходной файл:
 ///////////////////////////////начало файла/////////////////////////////////////////////////////////////////////////////
 <html>
-  <body>
-    <p>
-      <ul>
-        <li>
-          Утка по-пекински
-          <ul>
-            <li>Утка</li>
-            <li>Соус</li>
-          </ul>
-        </li>
-        <li>
-          Салат Оливье
-          <ol>
-            <li>Мясо
-              <ul>
-                <li>Или колбаса</li>
-              </ul>
-            </li>
-            <li>Майонез</li>
-            <li>Картофель</li>
-            <li>Что-то там ещё</li>
-          </ol>
-        </li>
-        <li>Помидоры</li>
-        <li>Фрукты
-          <ol>
-            <li>Бананы</li>
-            <li>Яблоки
-              <ol>
-                <li>Красные</li>
-                <li>Зелёные</li>
-              </ol>
-            </li>
-          </ol>
-        </li>
-      </ul>
-    </p>
-  </body>
+<body>
+<p>
+<ul>
+<li>
+Утка по-пекински
+<ul>
+<li>Утка</li>
+<li>Соус</li>
+</ul>
+</li>
+<li>
+Салат Оливье
+<ol>
+<li>Мясо
+<ul>
+<li>Или колбаса</li>
+</ul>
+</li>
+<li>Майонез</li>
+<li>Картофель</li>
+<li>Что-то там ещё</li>
+</ol>
+</li>
+<li>Помидоры</li>
+<li>Фрукты
+<ol>
+<li>Бананы</li>
+<li>Яблоки
+<ol>
+<li>Красные</li>
+<li>Зелёные</li>
+</ol>
+</li>
+</ol>
+</li>
+</ul>
+</p>
+</body>
 </html>
 ///////////////////////////////конец файла//////////////////////////////////////////////////////////////////////////////
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
@@ -404,23 +487,23 @@ fun markdownToHtml(inputName: String, outputName: String) {
  * Вывести в выходной файл процесс умножения столбиком числа lhv (> 0) на число rhv (> 0).
  *
  * Пример (для lhv == 19935, rhv == 111):
-   19935
-*    111
+19935
+ *    111
 --------
-   19935
+19935
 + 19935
 +19935
 --------
- 2212785
+2212785
  * Используемые пробелы, отступы и дефисы должны в точности соответствовать примеру.
  * Нули в множителе обрабатывать так же, как и остальные цифры:
-  235
-*  10
+235
+ *  10
 -----
-    0
+0
 +235
 -----
- 2350
+2350
  *
  */
 fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
@@ -434,21 +517,54 @@ fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
  * Вывести в выходной файл процесс деления столбиком числа lhv (> 0) на число rhv (> 0).
  *
  * Пример (для lhv == 19935, rhv == 22):
-  19935 | 22
- -198     906
- ----
-    13
-    -0
-    --
-    135
-   -132
-   ----
-      3
+19935 | 22
+-198     906
+----
+13
+-0
+--
+135
+-132
+----
+3
 
  * Используемые пробелы, отступы и дефисы должны в точности соответствовать примеру.
  *
  */
 fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
-    TODO()
+    val writer = File(outputName).bufferedWriter()
+    var numberOfDigits = digitNumber(lhv)
+    var firstValue = "0"
+    while (firstValue.toInt() < rhv && numberOfDigits != 0) {
+        numberOfDigits--
+        firstValue = (lhv / 10.0.pow(numberOfDigits)).toInt().toString()
+    }
+
+    var quotient = " ".repeat(numberOfDigits + 3) + (lhv / rhv).toString()
+    var spaces = if (firstValue.length == digitNumber(firstValue.toInt() / rhv * rhv)) 1
+    else 0
+    writer.write(" ".repeat(spaces) + "$lhv | $rhv")
+    writer.newLine()
+    while (numberOfDigits >= 0) {
+        val nextValue = firstValue.toInt() / rhv * rhv
+        writer.write(" ".repeat(spaces + firstValue.length - digitNumber(nextValue) - 1) + "-$nextValue$quotient")
+        quotient = ""
+        writer.newLine()
+        if (firstValue.length > digitNumber(nextValue) + 1)
+            writer.write(" ".repeat(spaces) + "-".repeat(firstValue.length))
+        else
+            writer.write(" ".repeat(spaces + firstValue.length - digitNumber(nextValue) - 1) +
+                        "-".repeat(digitNumber(nextValue) + 1))
+        writer.newLine()
+        spaces += firstValue.length - digitNumber(firstValue.toInt() - nextValue)
+        if (numberOfDigits == 0)
+            firstValue = (firstValue.toInt() - nextValue).toString()
+        else firstValue = (firstValue.toInt() - nextValue).toString() +
+                ((lhv % 10.0.pow(numberOfDigits).toInt()) / 10.0.pow(numberOfDigits - 1).toInt()).toString()
+        writer.write(" ".repeat(spaces) + firstValue)
+        writer.newLine()
+        numberOfDigits--
+    }
+    writer.close()
 }
 
