@@ -499,7 +499,8 @@ fun markdownToHtml(inputName: String, outputName: String) {
                 continue
             }
             var j = 0
-            var formattedStr = line.replace(Regex("""^((\s{4})*\*\s)"""), "").replace(Regex("""^((\s{4})*\d+\.\s)"""), "")
+            var formattedStr =
+                line.replace(Regex("""^((\s{4})*\*\s)"""), "").replace(Regex("""^((\s{4})*\d+\.\s)"""), "")
 
             while (j < formattedStr.length) {
                 if (formattedStr[j] == '*' && formattedStr[j + 1] == '*' && !stack.contains("</b>")) {
