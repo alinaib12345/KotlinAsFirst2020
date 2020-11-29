@@ -126,7 +126,7 @@ fun countSubstrings(inputName: String, substrings: List<String>): Map<String, In
  *
  */
 fun sibilants(inputName: String, outputName: String) {
-
+    TODO()
 }
 
 /**
@@ -317,21 +317,21 @@ Suspendisse <s>et elit in enim tempus iaculis</s>.
  */
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
     File(outputName).bufferedWriter().use {
-        val stackk = Stack<String>()
+        val stack = Stack<String>()
         var emptiness = false
         it.write("<html><body>")
         it.write("<p>")
-        stackk.push("</p>")
+        stack.push("</p>")
         for (line in File(inputName).readLines()) {
             if (emptiness) {
                 it.write("<p>")
-                stackk.push("</p>")
+                stack.push("</p>")
             }
             if (line.isEmpty()) {
                 emptiness = true
-                while (stackk.isNotEmpty()) {
-                    it.write(stackk.lastElement())
-                    stackk.pop()
+                while (stack.isNotEmpty()) {
+                    it.write(stack.lastElement())
+                    stack.pop()
                 }
             }
             var j = 0
@@ -341,28 +341,28 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
                 formattedStr = formattedStr.replaceFirst("~~", "</s>")
             }
             while (j < line.length) {
-                if (line[j] == '*' && line[j + 1] == '*' && !stackk.contains("</b>")) {
+                if (line[j] == '*' && line[j + 1] == '*' && !stack.contains("</b>")) {
                     formattedStr = formattedStr.replaceFirst("**", "<b>")
-                    stackk.push("</b>")
+                    stack.push("</b>")
                     j++
-                } else if (line[j] == '*' && line[j + 1] == '*' && stackk.contains("</b>")) {
-                    formattedStr = formattedStr.replaceFirst("**", stackk.lastElement())
-                    stackk.pop()
+                } else if (line[j] == '*' && line[j + 1] == '*' && stack.contains("</b>")) {
+                    formattedStr = formattedStr.replaceFirst("**", stack.lastElement())
+                    stack.pop()
                     j++
-                } else if (line[j] == '*' && line[j + 1] != '*' && !stackk.contains("</i>")) {
+                } else if (line[j] == '*' && line[j + 1] != '*' && !stack.contains("</i>")) {
                     formattedStr = formattedStr.replaceFirst("*", "<i>")
-                    stackk.push("</i>")
-                } else if (line[j] == '*' && line[j + 1] != '*' && stackk.contains("</i>")) {
-                    formattedStr = formattedStr.replaceFirst("*", stackk.lastElement())
-                    stackk.pop()
+                    stack.push("</i>")
+                } else if (line[j] == '*' && line[j + 1] != '*' && stack.contains("</i>")) {
+                    formattedStr = formattedStr.replaceFirst("*", stack.lastElement())
+                    stack.pop()
                 }
                 j++
             }
             it.write(formattedStr)
         }
-        while (stackk.isNotEmpty()) {
-            it.write(stackk.lastElement())
-            stackk.pop()
+        while (stack.isNotEmpty()) {
+            it.write(stack.lastElement())
+            stack.pop()
         }
         it.write("</body></html>")
     }
@@ -478,7 +478,91 @@ fun markdownToHtmlLists(inputName: String, outputName: String) {
  *
  */
 fun markdownToHtml(inputName: String, outputName: String) {
-    TODO()
+    File(outputName).bufferedWriter().use {
+        val stack = Stack<String>()
+        var idents = -1
+        var emptiness = false
+        it.write("<html><body>")
+        it.write("<p>")
+        stack.push("</p>")
+        for (line in File(inputName).readLines()) {
+            if (emptiness) {
+                it.write("<p>")
+                stack.push("</p>")
+            }
+            if (line.isEmpty()) {
+                emptiness = true
+                while (stack.isNotEmpty()) {
+                    it.write(stack.lastElement())
+                    stack.pop()
+                }
+                continue
+            }
+            var j = 0
+            var formattedStr = line.replace(Regex("""^((\s{4})*\*\s)"""), "").replace(Regex("""^((\s{4})*\d+\.\s)"""), "")
+
+            while (j < formattedStr.length) {
+                if (formattedStr[j] == '*' && formattedStr[j + 1] == '*' && !stack.contains("</b>")) {
+                    formattedStr = formattedStr.replaceFirst("**", "<b>")
+                    stack.push("</b>")
+                    j++
+                } else if (formattedStr[j] == '*' && formattedStr[j + 1] == '*' && stack.contains("</b>")) {
+                    formattedStr = formattedStr.replaceFirst("**", stack.lastElement())
+                    stack.pop()
+                    j++
+                } else if (formattedStr[j] == '*' && formattedStr[j + 1] != '*' && !stack.contains("</i>")) {
+                    formattedStr = formattedStr.replaceFirst("*", "<i>")
+                    stack.push("</i>")
+                } else if (formattedStr[j] == '*' && formattedStr[j + 1] != '*' && stack.contains("</i>")) {
+                    formattedStr = formattedStr.replaceFirst("*", stack.lastElement())
+                    stack.pop()
+                } else if (formattedStr[j] == '~' && formattedStr[j + 1] == '~' && !stack.contains("</s>")) {
+                    formattedStr = formattedStr.replaceFirst("~~", "<s>")
+                    stack.add("</s>")
+                    j++
+                } else if (formattedStr[j] == '~' && formattedStr[j + 1] == '~' && stack.contains("</s>")) {
+                    formattedStr = formattedStr.replaceFirst("~~", stack.lastElement())
+                    stack.pop()
+                    j++
+                }
+                j++
+            }
+            var i = 0
+            while (line[i] == ' ') i++
+            formattedStr = " ".repeat(i) + formattedStr
+            if (line.contains(Regex("""^((\s{4})*\*\s)""")) || line.contains(Regex("""^((\s{4})*\d+\.\s)"""))) {
+                when {
+                    i > idents -> {
+                        if (line.contains(Regex("""^(\s{4})*\*"""))) {
+                            it.write("<ul><li>$formattedStr")
+                            stack.add("</ul>")
+                            stack.add("</li>")
+                        } else if (line.contains(Regex("""^(\s{4})*\d+\."""))) {
+                            it.write("<ol><li>$formattedStr")
+                            stack.add("</ol>")
+                            stack.add("</li>")
+                        }
+                    }
+                    i == idents -> {
+                        it.write("</li><li>$formattedStr")
+                    }
+                    i < idents -> {
+                        it.write("</li>")
+                        stack.pop()
+                        it.write(stack.lastElement())
+                        stack.pop()
+                        it.write("</li><li>$formattedStr")
+                    }
+                }
+                idents = i
+            } else (it.write(formattedStr))
+        }
+        while (stack.isNotEmpty()) {
+            it.write(stack.lastElement())
+            stack.pop()
+        }
+        it.write("</body></html>")
+    }
 }
 
 /**
@@ -553,8 +637,10 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
         if (firstValue.length > digitNumber(nextValue) + 1)
             writer.write(" ".repeat(spaces) + "-".repeat(firstValue.length))
         else
-            writer.write(" ".repeat(spaces + firstValue.length - digitNumber(nextValue) - 1) +
-                        "-".repeat(digitNumber(nextValue) + 1))
+            writer.write(
+                " ".repeat(spaces + firstValue.length - digitNumber(nextValue) - 1) +
+                        "-".repeat(digitNumber(nextValue) + 1)
+            )
         writer.newLine()
         spaces += firstValue.length - digitNumber(firstValue.toInt() - nextValue)
         if (numberOfDigits == 0)
