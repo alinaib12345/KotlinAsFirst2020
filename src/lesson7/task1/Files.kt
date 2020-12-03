@@ -86,23 +86,24 @@ fun deleteMarked(inputName: String, outputName: String) {
  */
 fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> {
     val res = mutableMapOf<String, Int>()
+    val lowerdRes = mutableMapOf<String, Int>()
     val substring = substrings.toSet()
     for (i in substring) {
-        res[i] = 0
+        lowerdRes[i.toLowerCase()] = 0
     }
     for (line in File(inputName).readLines()) {
-        for (listString in res.keys) {
-            val lineToLowerCase = line.toLowerCase()
-            val listStringToLowerCase = listString.toLowerCase()
-            if (lineToLowerCase.contains(listStringToLowerCase)) {
+        val lineToLowerCase = line.toLowerCase()
+        for (listString in lowerdRes.keys) {
+            if (lineToLowerCase.contains(listString)) {
                 for (char in 0..line.length - listString.length) {
-                    if (lineToLowerCase.substring(char, char + listString.length).contains(listStringToLowerCase))
-                        res[listString] = res[listString]!! + 1
+                    if (lineToLowerCase.substring(char, char + listString.length).contains(listString))
+                        lowerdRes[listString] = lowerdRes[listString]!! + 1
                 }
             }
 
         }
     }
+    for (str in substring) res[str] = lowerdRes[str.toLowerCase()]!!
     return res
 }
 
@@ -312,40 +313,29 @@ Suspendisse <s>et elit in enim tempus iaculis</s>.
 fun html(stack: Stack<String>, line: String, check: Int): String {
     var formattedStr = if (check == 0) line
     else line.replace(Regex("""^((\s{4})*\*\s)"""), "").replace(Regex("""^((\s{4})*\d+\.\s)"""), "")
+    val openTags = mapOf("**" to "<b>", "*" to "<i>", "~~" to "<s>")
+    val closeTags = mapOf("**" to "</b>", "*" to "</i>", "~~" to "</s>")
     var j = 0
-    while (j < formattedStr.length) {
-        if (formattedStr[j] == '*') {
-            when {
-                formattedStr[j + 1] == '*' -> {
-                    if (stack.lastElement() != "</b>") {
-                        formattedStr = formattedStr.replaceFirst("**", "<b>")
-                        stack.push("</b>")
-                    } else {
-                        formattedStr = formattedStr.replaceFirst("**", stack.lastElement())
-                        stack.pop()
-                    }
-                    j++
-                }
-                else -> {
-                    if (stack.lastElement() != "</i>") {
-                        formattedStr = formattedStr.replaceFirst("*", "<i>")
-                        stack.push("</i>")
-                    } else {
-                        formattedStr = formattedStr.replaceFirst("*", stack.lastElement())
-                        stack.pop()
-
-                    }
-                }
+    while (j < formattedStr.length - 1) {
+        var replacement: String
+        if (openTags.containsKey(formattedStr[j].toString() + formattedStr[j + 1].toString())) {
+            replacement = formattedStr[j].toString() + formattedStr[j + 1].toString()
+            j++
+        } else if (openTags.containsKey(formattedStr[j].toString())) {
+            replacement = formattedStr[j].toString()
+        } else {
+            j++
+            continue
+        }
+        when {
+            stack.lastElement() != closeTags[replacement] -> {
+                formattedStr = formattedStr.replaceFirst(replacement, openTags.getValue(replacement))
+                stack.push(closeTags[replacement])
             }
-        } else if (formattedStr[j] == '~' && formattedStr[j + 1] == '~') {
-            if (stack.lastElement() != "</s>") {
-                formattedStr = formattedStr.replaceFirst("~~", "<s>")
-                stack.push("</s>")
-            } else {
-                formattedStr = formattedStr.replaceFirst("~~", stack.lastElement())
+            else -> {
+                formattedStr = formattedStr.replaceFirst(replacement, stack.lastElement())
                 stack.pop()
             }
-            j++
         }
         j++
     }
@@ -371,6 +361,7 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
                     it.write(stack.lastElement())
                     stack.pop()
                 }
+                continue
             }
             val check = 0
             it.write(html(stack, line, check))
@@ -500,7 +491,11 @@ fun markdownToHtml(inputName: String, outputName: String) {
         it.write("<html><body>")
         it.write("<p>")
         stack.push("</p>")
+        val regex1 = Regex("""^((\s{4})*\*\s)""")
+        val regex2 = Regex("""^((\s{4})*\d+\.\s)""")
         for (line in File(inputName).readLines()) {
+            val flag =
+                line.contains(regex1) || line.contains(regex2)
             if (emptiness) {
                 it.write("<p>")
                 stack.push("</p>")
@@ -518,7 +513,7 @@ fun markdownToHtml(inputName: String, outputName: String) {
             var i = 0
             while (line[i] == ' ') i++
             formattedStr = " ".repeat(i) + formattedStr
-            if (line.contains(Regex("""^((\s{4})*\*\s)""")) || line.contains(Regex("""^((\s{4})*\d+\.\s)"""))) {
+            if (flag) {
                 when {
                     i > idents -> {
                         if (line[i] == '*') {
