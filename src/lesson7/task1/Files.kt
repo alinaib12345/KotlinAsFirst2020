@@ -86,24 +86,24 @@ fun deleteMarked(inputName: String, outputName: String) {
  */
 fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> {
     val res = mutableMapOf<String, Int>()
-    val lowerdRes = mutableMapOf<String, Int>()
+    val loweredRes = mutableMapOf<String, Int>()
     val substring = substrings.toSet()
     for (i in substring) {
-        lowerdRes[i.toLowerCase()] = 0
+        loweredRes[i.toLowerCase()] = 0
     }
     for (line in File(inputName).readLines()) {
         val lineToLowerCase = line.toLowerCase()
-        for (listString in lowerdRes.keys) {
+        for (listString in loweredRes.keys) {
             if (lineToLowerCase.contains(listString)) {
                 for (char in 0..line.length - listString.length) {
                     if (lineToLowerCase.substring(char, char + listString.length).contains(listString))
-                        lowerdRes[listString] = lowerdRes[listString]!! + 1
+                        loweredRes[listString] = loweredRes[listString]!! + 1
                 }
             }
 
         }
     }
-    for (str in substring) res[str] = lowerdRes[str.toLowerCase()]!!
+    for (str in substring) res[str] = loweredRes[str.toLowerCase()]!!
     return res
 }
 
@@ -353,15 +353,10 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
         for (line in File(inputName).readLines()) {
             if (emptiness) {
                 it.write("<p>")
-                stack.push("</p>")
             }
             if (line.isEmpty()) {
                 emptiness = true
-                while (stack.isNotEmpty()) {
-                    it.write(stack.lastElement())
-                    stack.pop()
-                }
-                continue
+                it.write("</p>")
             }
             val check = 0
             it.write(html(stack, line, check))
