@@ -350,13 +350,19 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
         it.write("<html><body>")
         it.write("<p>")
         stack.push("</p>")
+        var count = 0
         for (line in File(inputName).readLines()) {
-            if (emptiness) {
-                it.write("<p>")
-            }
-            if (line.matches(Regex("""\s*"""))) {
+            if (line.isEmpty()) {
                 emptiness = true
+            }
+            if (line.matches(Regex("""\s*""")) && emptiness) {
+                count++
+                continue
+            }
+            if (count != 0 && emptiness && line.isNotEmpty()) {
                 it.write("</p>")
+                it.write("<p>")
+                count = 0
             }
             val check = 0
             it.write(html(stack, line, check))
