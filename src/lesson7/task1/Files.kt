@@ -346,17 +346,17 @@ fun html(stack: Stack<String>, line: String, check: Int): String {
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
     File(outputName).bufferedWriter().use {
         val stack = Stack<String>()
+        var emptiness = false
         it.write("<html><body>")
+        it.write("<p>")
+        stack.push("</p>")
         for (line in File(inputName).readLines()) {
-            if (line.trim() == "") {
-                if (stack.isNotEmpty() && stack.peek() == "</p>") {
-                    it.write(stack.pop())
-                }
-            } else {
-                if (stack.isEmpty()) {
-                    stack.push("</p>")
-                    it.write("<p>")
-                }
+            if (emptiness) {
+                it.write("<p>")
+            }
+            if (line.isEmpty()) {
+                emptiness = true
+                it.write("</p>")
             }
             val check = 0
             it.write(html(stack, line, check))
