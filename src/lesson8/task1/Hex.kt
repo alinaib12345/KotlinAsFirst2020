@@ -38,13 +38,13 @@ data class HexPoint(val x: Int, val y: Int) {
      * Расстояние вычисляется как число единичных отрезков в пути между двумя гексами.
      * Например, путь межу гексами 16 и 41 (см. выше) может проходить через 25, 34, 43 и 42 и имеет длину 5.
      */
-    fun distance(other: HexPoint): Int = when {
-        other.x >= x && other.y >= y || other.x <= x && other.y <= y -> abs(other.x - x) + abs(other.y - y)
-        other.x > x && other.y < y && other.x + other.y == x + y ||
-                other.x < x && other.y > y && other.x + other.y == x + y -> abs(other.y - y)
-        else -> abs(other.y - y) + abs(abs(other.y - y) - abs(other.x - x))
-
+    fun distance(other: HexPoint): Int =  when {
+        other.y > y && other.x <= x && other.y + other.x >= y + x ||
+                other.y < y && other.x >= x && other.y + other.x <= y + x -> abs(y - other.y)
+        other.y >= y && other.x > x || other.y <= y && other.x < x -> abs(y - other.y) + abs(x - other.x)
+        else -> abs(y - other.y) + abs(other.y + other.x - y - x)
     }
+
 
     override fun toString(): String = "$y.$x"
 }
@@ -67,7 +67,9 @@ data class Hexagon(val center: HexPoint, val radius: Int) {
      * и другим шестиугольником B с центром в 26 и радиуоом 2 равно 2
      * (расстояние между точками 32 и 24)
      */
-    fun distance(other: Hexagon): Int = maxOf(center.distance(other.center) - radius - other.radius, 0)
+    fun distance(other: Hexagon): Int =
+        if (center.distance(other.center) <= radius + other.radius) 0
+        else center.distance(other.center) - radius - other.radius
 
     /**
      * Тривиальная (1 балл)
