@@ -347,18 +347,16 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
     File(outputName).bufferedWriter().use {
         val stack = Stack<String>()
         it.write("<html><body>")
-        it.write("<p>")
-        stack.push("</p>")
-        var count = 0
         for (line in File(inputName).readLines()) {
-            if (line.matches(Regex("""\s*"""))) {
-                count++
-                continue
-            }
-            if (count != 0) {
-                it.write("</p>")
-                it.write("<p>")
-                count = 0
+            if (line.trim() == "") {
+                if (stack.isNotEmpty() && stack.peek() == "</p>") {
+                    it.write(stack.pop())
+                }
+            } else {
+                if (stack.isEmpty()) {
+                    stack.push("</p>")
+                    it.write("<p>")
+                }
             }
             val check = 0
             it.write(html(stack, line, check))
