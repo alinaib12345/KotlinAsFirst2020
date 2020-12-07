@@ -354,7 +354,7 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
             if (emptiness) {
                 it.write("<p>")
             }
-            if (line.isEmpty()) {
+            if (line.matches(Regex("""\s*"""))) {
                 emptiness = true
                 it.write("</p>")
             }
