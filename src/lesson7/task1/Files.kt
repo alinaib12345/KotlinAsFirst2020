@@ -353,14 +353,10 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
         for (line in File(inputName).readLines()) {
             if (emptiness) {
                 it.write("<p>")
-                stack.add("</p>")
             }
             if (line.isEmpty()) {
-                while (stack.lastElement() != "</p>") it.write(stack.removeLast())
-                it.write("</p>")
-                stack.removeLast()
                 emptiness = true
-                continue
+                it.write("</p>")
             } else emptiness = false
             val check = 0
             it.write(html(stack, line, check))
