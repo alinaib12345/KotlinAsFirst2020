@@ -357,6 +357,7 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
             if (line.isEmpty()) {
                 emptiness = true
                 it.write("</p>")
+                continue
             } else emptiness = false
             val check = 0
             it.write(html(stack, line, check))
