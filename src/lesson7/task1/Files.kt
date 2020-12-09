@@ -328,7 +328,7 @@ fun html(stack: Stack<String>, line: String, check: Int): String {
             continue
         }
         when {
-            stack.lastElement() != closeTags[replacement] -> {
+            stack.lastOrNull() != closeTags[replacement] -> {
                 formattedStr = formattedStr.replaceFirst(replacement, openTags.getValue(replacement))
                 stack.push(closeTags[replacement])
             }
@@ -347,9 +347,7 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
     File(outputName).bufferedWriter().use {
         val stack = Stack<String>()
         var emptiness = false
-        it.write("<html><body>")
-        it.write("<p>")
-        stack.push("</p>")
+        it.write("<html><body><p>")
         for (line in File(inputName).readLines()) {
             if (emptiness) {
                 it.write("<p>")
@@ -362,11 +360,7 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
             val check = 0
             it.write(html(stack, line, check))
         }
-        while (stack.isNotEmpty()) {
-            it.write(stack.lastElement())
-            stack.pop()
-        }
-        it.write("</body></html>")
+        it.write("</p></body></html>")
     }
 }
 
