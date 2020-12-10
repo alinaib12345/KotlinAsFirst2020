@@ -86,24 +86,24 @@ fun deleteMarked(inputName: String, outputName: String) {
  */
 fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> {
     val res = mutableMapOf<String, Int>()
-    val loweredRes = mutableMapOf<String, Int>()
-    val substring = substrings.toSet()
-    for (i in substring) {
-        loweredRes[i.toLowerCase()] = 0
+    val loweredRes = mutableMapOf<String, Int?>()
+    val substringsSet = substrings.toSet()
+    for (substring in substringsSet) {
+        loweredRes[substring.toLowerCase()] = 0
     }
-    for (line in File(inputName).readLines()) {
+    File(inputName).forEachLine { line ->
         val lineToLowerCase = line.toLowerCase()
         for (listString in loweredRes.keys) {
             if (lineToLowerCase.contains(listString)) {
                 for (char in 0..line.length - listString.length) {
                     if (lineToLowerCase.substring(char, char + listString.length).contains(listString))
-                        loweredRes[listString] = loweredRes[listString]!! + 1
+                        loweredRes[listString] = loweredRes[listString]?.plus(1)
                 }
             }
 
         }
     }
-    for (str in substring) res[str] = loweredRes[str.toLowerCase()]!!
+    for (str in substringsSet) res[str] = loweredRes[str.toLowerCase()]!!
     return res
 }
 
@@ -310,18 +310,23 @@ Suspendisse <s>et elit in enim tempus iaculis</s>.
  *
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
-fun html(stack: Stack<String>, line: String, check: Int): String {
+fun html(
+    stack: Stack<String>, line: String, check: Int,
+    closeTags:
+    Map<String, String>,
+    openTags: Map<String, String>,
+): String {
     var formattedStr = if (check == 0) line
     else line.replace(Regex("""^((\s{4})*\*\s)"""), "").replace(Regex("""^((\s{4})*\d+\.\s)"""), "")
-    val openTags = mapOf("**" to "<b>", "*" to "<i>", "~~" to "<s>")
-    val closeTags = mapOf("**" to "</b>", "*" to "</i>", "~~" to "</s>")
+
     var j = 0
     while (j < formattedStr.length - 1) {
         var replacement: String
         if (openTags.containsKey(formattedStr[j].toString() + formattedStr[j + 1].toString())) {
             replacement = formattedStr[j].toString() + formattedStr[j + 1].toString()
             j++
-        } else if (openTags.containsKey(formattedStr[j].toString())) {
+        }
+        else if (openTags.containsKey(formattedStr[j].toString())) {
             replacement = formattedStr[j].toString()
         } else {
             j++
@@ -346,19 +351,24 @@ fun html(stack: Stack<String>, line: String, check: Int): String {
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
     File(outputName).bufferedWriter().use {
         val stack = Stack<String>()
-        var emptiness = false
+        var flag = false //имеется ли непустая строка раннее
+        val regex = Regex("""\s*""")
+        var emptinessCount = 0
+        val openTags = mapOf("**" to "<b>", "*" to "<i>", "~~" to "<s>")
+        val closeTags = mapOf("**" to "</b>", "*" to "</i>", "~~" to "</s>")
         it.write("<html><body><p>")
         for (line in File(inputName).readLines()) {
-            if (emptiness) {
-                it.write("<p>")
-            }
-            if (line.isEmpty()) {
-                emptiness = true
-                it.write("</p>")
+            if (line.matches(regex)) {
+                emptinessCount++
                 continue
-            } else emptiness = false
+            }
+            if (emptinessCount != 0 && flag) {
+                it.write("</p><p>")
+            }
+            flag = true
+            emptinessCount = 0
             val check = 0
-            it.write(html(stack, line, check))
+            it.write(html(stack, line, check, closeTags, openTags))
         }
         it.write("</p></body></html>")
     }
@@ -478,6 +488,8 @@ fun markdownToHtml(inputName: String, outputName: String) {
         val stack = Stack<String>()
         var idents = -1
         var emptiness = false
+        val openTags = mapOf("**" to "<b>", "*" to "<i>", "~~" to "<s>")
+        val closeTags = mapOf("**" to "</b>", "*" to "</i>", "~~" to "</s>")
         it.write("<html><body>")
         it.write("<p>")
         stack.push("</p>")
@@ -499,7 +511,7 @@ fun markdownToHtml(inputName: String, outputName: String) {
                 continue
             }
             val check = 1
-            var formattedStr = html(stack, line, check)
+            var formattedStr = html(stack, line, check, closeTags, openTags)
             var i = 0
             while (line[i] == ' ') i++
             formattedStr = " ".repeat(i) + formattedStr
