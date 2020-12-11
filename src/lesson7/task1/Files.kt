@@ -13,6 +13,7 @@ import kotlin.math.pow
 // Рекомендуемое количество баллов = 20
 // Вместе с предыдущими уроками (пять лучших, 3-7) = 55/103
 
+
 /**
  * Пример
  *
@@ -320,28 +321,54 @@ fun html(
     else line.replace(Regex("""^((\s{4})*\*\s)"""), "").replace(Regex("""^((\s{4})*\d+\.\s)"""), "")
 
     var j = 0
-    while (j < formattedStr.length - 1) {
+    while (j < formattedStr.length - 2) {
         var replacement: String
-        if (openTags.containsKey(formattedStr[j].toString() + formattedStr[j + 1].toString())) {
-            replacement = formattedStr[j].toString() + formattedStr[j + 1].toString()
+        val symbol = formattedStr[j].toString()
+        val nextSymbol = formattedStr[j + 1].toString()
+        val nextNextSymbol = formattedStr[j + 2].toString()
+
+        if (openTags.containsKey(symbol + nextSymbol + nextNextSymbol)) {
+            replacement = symbol + nextSymbol + nextNextSymbol
+            j += 2
+        } else if (openTags.containsKey(symbol + nextSymbol)) {
+            replacement = symbol + nextSymbol
             j++
-        }
-        else if (openTags.containsKey(formattedStr[j].toString())) {
-            replacement = formattedStr[j].toString()
+        } else if (openTags.containsKey(symbol)) {
+            replacement = symbol
         } else {
             j++
             continue
         }
-        when {
-            stack.lastOrNull() != closeTags[replacement] -> {
-                formattedStr = formattedStr.replaceFirst(replacement, openTags.getValue(replacement))
-                stack.push(closeTags[replacement])
+        if (replacement.length == 3) {
+            when {
+                stack.lastElement() == closeTags[replacement] -> {
+                    formattedStr = formattedStr.replaceFirst(replacement, stack.lastElement())
+                    stack.pop()
+                }
+                stack.lastElement() == "</i>" -> {
+                    formattedStr = formattedStr.replaceFirst(replacement, "</i></b>")
+                    stack.pop()
+                    stack.pop()
+                }
+                stack.lastElement() == "</b>" -> {
+                    formattedStr = formattedStr.replaceFirst(replacement, "</b></i>")
+                    stack.pop()
+                    stack.pop()
+                }
             }
-            else -> {
-                formattedStr = formattedStr.replaceFirst(replacement, stack.lastElement())
-                stack.pop()
+        } else {
+            when {
+                stack.lastOrNull() != closeTags[replacement] -> {
+                    formattedStr = formattedStr.replaceFirst(replacement, openTags.getValue(replacement))
+                    stack.push(closeTags[replacement])
+                }
+                else -> {
+                    formattedStr = formattedStr.replaceFirst(replacement, stack.lastElement())
+                    stack.pop()
+                }
             }
         }
+
         j++
     }
     return formattedStr
@@ -354,8 +381,8 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
         var flag = false //имеется ли непустая строка раннее
         val regex = Regex("""\s*""")
         var emptinessCount = 0
-        val openTags = mapOf("**" to "<b>", "*" to "<i>", "~~" to "<s>")
-        val closeTags = mapOf("**" to "</b>", "*" to "</i>", "~~" to "</s>")
+        val openTags = mapOf("***" to "<b><i>", "**" to "<b>", "*" to "<i>", "~~" to "<s>")
+        val closeTags = mapOf("***" to "</i></b>", "**" to "</b>", "*" to "</i>", "~~" to "</s>")
         it.write("<html><body><p>")
         for (line in File(inputName).readLines()) {
             if (line.matches(regex)) {
@@ -488,8 +515,8 @@ fun markdownToHtml(inputName: String, outputName: String) {
         val stack = Stack<String>()
         var idents = -1
         var emptiness = false
-        val openTags = mapOf("**" to "<b>", "*" to "<i>", "~~" to "<s>")
-        val closeTags = mapOf("**" to "</b>", "*" to "</i>", "~~" to "</s>")
+        val openTags = mapOf("***" to "<b><i>", "**" to "<b>", "*" to "<i>", "~~" to "<s>")
+        val closeTags = mapOf("***" to "</i></b>", "**" to "</b>", "*" to "</i>", "~~" to "</s>")
         it.write("<html><body>")
         it.write("<p>")
         stack.push("</p>")
