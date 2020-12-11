@@ -321,11 +321,14 @@ fun html(
     else line.replace(Regex("""^((\s{4})*\*\s)"""), "").replace(Regex("""^((\s{4})*\d+\.\s)"""), "")
 
     var j = 0
-    while (j < formattedStr.length - 2) {
+    while (j < formattedStr.length) {
         var replacement: String
         val symbol = formattedStr[j].toString()
-        val nextSymbol = formattedStr[j + 1].toString()
-        val nextNextSymbol = formattedStr[j + 2].toString()
+        val nextSymbol = if (j + 1 < formattedStr.length) formattedStr[j + 1].toString()
+        else ""
+        val nextNextSymbol = if (j + 2 < formattedStr.length) formattedStr[j + 2].toString()
+        else ""
+
 
         if (openTags.containsKey(symbol + nextSymbol + nextNextSymbol)) {
             replacement = symbol + nextSymbol + nextNextSymbol
@@ -373,7 +376,6 @@ fun html(
     }
     return formattedStr
 }
-
 
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
     File(outputName).bufferedWriter().use {
