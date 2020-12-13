@@ -2,7 +2,6 @@
 
 package lesson8.task1
 
-import java.io.Serializable
 import kotlin.math.abs
 
 /**
@@ -222,7 +221,7 @@ enum class Direction {
  * 35, direction = UP_LEFT, distance = 2 --> 53
  * 45, direction = DOWN_LEFT, distance = 4 --> 05
  */
-fun HexPoint.move(direction: Serializable, distance: Int): HexPoint {
+fun HexPoint.move(direction: Direction, distance: Int): HexPoint {
     if (direction == Direction.INCORRECT) throw IllegalArgumentException("Incorrect direction")
     if (distance == 0) return this
     return when (direction) {
