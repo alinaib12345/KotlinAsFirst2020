@@ -293,28 +293,27 @@ fun pathBetweenHexes(from: HexPoint, to: HexPoint): List<HexPoint> {
 fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
     if (a == b && b == c) return Hexagon(a, 0)
     val maxDist = maxOf(a.distance(b), a.distance(c), b.distance(c))
-    val sideA =
-        when { //Определяет, на какой стороне лежит точка а (начиная с самой верхней стороны против часовой стрелки)
-            a.y >= b.y && a.y >= c.y -> 1
-            a.x <= b.x && a.x <= c.x -> 2
-            a.x + a.y <= b.x + b.y && a.x + a.y <= c.x + c.y -> 3
-            a.y <= b.y && a.y <= c.y -> 4
-            a.x >= b.x && a.x >= c.x -> 5
-            a.x + a.y >= b.x + b.y && a.x + a.y >= c.x + c.y -> 6
-            else -> 0
-        }
+    val sideForA = mutableSetOf<Int>()
+    when { //Определяет, на какой стороне ожет лежать точка а (начиная с самой верхней стороны против часовой стрелки)
+        a.y >= b.y && a.y >= c.y -> sideForA.add(0)
+        a.x <= b.x && a.x <= c.x -> sideForA.add(1)
+        a.x + a.y <= b.x + b.y && a.x + a.y <= c.x + c.y -> sideForA.add(2)
+        a.y <= b.y && a.y <= c.y -> sideForA.add(3)
+        a.x >= b.x && a.x >= c.x -> sideForA.add(4)
+        a.x + a.y >= b.x + b.y && a.x + a.y >= c.x + c.y -> sideForA.add(5)
+    }
     for (radius in maxDist / 2..maxDist) for (j in 0..radius) {
-        val hexagon = when (sideA) {
-            1 -> Hexagon(HexPoint(a.x + j, a.y - radius), radius)
-            2 -> Hexagon(HexPoint(a.x + radius, a.y - radius + j), radius)
-            3 -> Hexagon(HexPoint(a.x + radius - j, a.y + j), radius)
-            4 -> Hexagon(HexPoint(a.x - j, a.y + radius), radius)
-            5 -> Hexagon(HexPoint(a.x - radius, a.y + radius - j), radius)
-            6 -> Hexagon(HexPoint(a.x - radius + j, a.y - j), radius)
-            else -> break
+        val hexagon = arrayOf(
+            Hexagon(HexPoint(a.x + j, a.y - radius), radius),
+            Hexagon(HexPoint(a.x + radius, a.y - radius + j), radius),
+            Hexagon(HexPoint(a.x + radius - j, a.y + j), radius),
+            Hexagon(HexPoint(a.x - j, a.y + radius), radius),
+            Hexagon(HexPoint(a.x - radius, a.y + radius - j), radius),
+            Hexagon(HexPoint(a.x - radius + j, a.y - j), radius)
+        )
+        for (k in sideForA) {
+            if (hexagon[k].isOnBorder(b) && hexagon[k].isOnBorder(c)) return hexagon[k]
         }
-
-        if (hexagon.isOnBorder(b) && hexagon.isOnBorder(c)) return hexagon
 
     }
     return null
