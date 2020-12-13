@@ -93,6 +93,7 @@ data class Hexagon(val center: HexPoint, val radius: Int) {
         }
         return point in points
     }
+
 }
 
 /**
@@ -151,8 +152,6 @@ class HexSegment(val begin: HexPoint, val end: HexPoint) {
 
     override fun hashCode() =
         begin.hashCode() + end.hashCode()
-
-
 }
 
 /**
@@ -300,7 +299,7 @@ fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
     if (a == b && b == c) return Hexagon(a, 0)
     val maxDist = maxOf(a.distance(b), a.distance(c), b.distance(c))
     val sideA =
-        when { //Определяет, на какой стороне лежит точка а (начиная с самой верхней стороны против часовой стрелки)
+        when {
             a.y >= b.y && a.y >= c.y -> 1
             a.x <= b.x && a.x <= c.x -> 2
             a.x + a.y <= b.x + b.y && a.x + a.y <= c.x + c.y -> 3
@@ -336,6 +335,3 @@ fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
  * Пример: 13, 32, 45, 18 -- шестиугольник радиусом 3 (с центром, например, в 15)
  */
 fun minContainingHexagon(vararg points: HexPoint): Hexagon = TODO()
-
-
-
