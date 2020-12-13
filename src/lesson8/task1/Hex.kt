@@ -2,6 +2,7 @@
 
 package lesson8.task1
 
+import java.io.Serializable
 import kotlin.math.abs
 
 /**
@@ -77,6 +78,22 @@ data class Hexagon(val center: HexPoint, val radius: Int) {
      * Вернуть true, если заданная точка находится внутри или на границе шестиугольника
      */
     fun contains(point: HexPoint): Boolean = center.distance(point) <= radius
+
+    /**
+     * Проверяет, содержится ли точка на границе
+     */
+    fun isOnBorder(point: HexPoint): Boolean {
+        val directions = Direction.values().dropLast(1).toList()
+        val points = mutableSetOf<HexPoint>()
+        var currentPoint = center.move(Direction.DOWN_LEFT, radius)
+        for (direction in directions) {
+            for (i in 0 until radius) {
+                points.add(currentPoint)
+                currentPoint = currentPoint.move(direction, 1)
+            }
+        }
+        return point in points
+    }
 }
 
 /**
@@ -120,6 +137,21 @@ class HexSegment(val begin: HexPoint, val end: HexPoint) {
 
     override fun hashCode() =
         begin.hashCode() + end.hashCode()
+
+    /**
+     *Определяет направления кратчайшего пути для неправильного отрезка
+     */
+    fun directionForInvalid(): Pair<Direction, Direction> = when {
+        begin.y > end.y && end.x in begin.x + 1 until begin.x + begin.y - end.y ->
+            Pair(Direction.DOWN_LEFT, Direction.DOWN_RIGHT)
+        begin.y < end.y && end.x in begin.x + begin.y + 1 - end.y until begin.x ->
+            Pair(Direction.UP_LEFT, Direction.UP_RIGHT)
+        begin.y < end.y && begin.x < end.x -> Pair(Direction.RIGHT, Direction.UP_RIGHT)
+        begin.y < end.y && begin.x > end.x -> Pair(Direction.RIGHT, Direction.DOWN_RIGHT)
+        begin.y > end.y && begin.x > end.x -> Pair(Direction.LEFT, Direction.DOWN_LEFT)
+
+        else -> Pair(Direction.LEFT, Direction.UP_LEFT)
+    }
 }
 
 /**
@@ -190,7 +222,7 @@ enum class Direction {
  * 35, direction = UP_LEFT, distance = 2 --> 53
  * 45, direction = DOWN_LEFT, distance = 4 --> 05
  */
-fun HexPoint.move(direction: Direction, distance: Int): HexPoint {
+fun HexPoint.move(direction: Serializable, distance: Int): HexPoint {
     if (direction == Direction.INCORRECT) throw IllegalArgumentException("Incorrect direction")
     if (distance == 0) return this
     return when (direction) {
@@ -223,21 +255,28 @@ fun HexPoint.move(direction: Direction, distance: Int): HexPoint {
  *     )
  */
 fun pathBetweenHexes(from: HexPoint, to: HexPoint): List<HexPoint> {
-    val result = mutableListOf(from)
-    val directions = Direction.values().dropLast(1).toList()
+    val result = mutableListOf<HexPoint>()
     var nextFrom = from
-    var distance = from.distance(to)
-    var dir = Direction.RIGHT
-    while (nextFrom != to) {
-        for (direction in directions) {
-            if (nextFrom.move(direction, 1).distance(to) < distance) {
-                distance = nextFrom.move(direction, 1).distance(to)
-                dir = direction
-            }
+    val validity = HexSegment(from, to).isValid()
+    if (validity) {
+        val direction = HexSegment(from, to).direction()
+        while (from != to) {
+            result.add(nextFrom)
+            nextFrom = nextFrom.move(direction, 1)
         }
-        nextFrom = nextFrom.move(dir, 1)
-        result.add(nextFrom)
+    } else {
+        val firstD = HexSegment(from, to).directionForInvalid().first
+        val secondD = HexSegment(from, to).directionForInvalid().second
+        while (!HexSegment(nextFrom, to).isValid()) {
+            result.add(nextFrom)
+            nextFrom = nextFrom.move(firstD, 1)
+        }
+        while (nextFrom != to) {
+            result.add(nextFrom)
+            nextFrom = nextFrom.move(secondD, 1)
+        }
     }
+    result.add(to)
     return result
 }
 
@@ -257,21 +296,29 @@ fun pathBetweenHexes(from: HexPoint, to: HexPoint): List<HexPoint> {
  * Если все три точки совпадают, вернуть шестиугольник нулевого радиуса с центром в данной точке.
  */
 fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
-    val points = setOf(a, b, c)
-    if (points.size == 1) return Hexagon(a, 0)
+    if (a == b && b == c) return Hexagon(a, 0)
     val maxDist = maxOf(a.distance(b), a.distance(c), b.distance(c))
-    val minDist = minOf(a.distance(b), a.distance(c), b.distance(c)) / 2
-    val directions = Direction.values().dropLast(1).toList()
-    for (r in minDist..maxDist) {
-        var center = a.move(Direction.DOWN_LEFT, r)
-        for (direction in directions) {
-            for (i in 0 until r) {
-                val distanceB = center.distance(b)
-                val distanceC = center.distance(c)
-                if (distanceB == r && distanceC == r) return Hexagon(center, r)
-                center = center.move(direction, 1)
-            }
+    val sideA =
+        when { //Определяет, на какой стороне лежит точка а (начиная с самой верхней стороны против часовой стрелки)
+            a.y >= b.y && a.y >= c.y -> 1
+            a.x <= b.x && a.x <= c.x -> 2
+            a.x + a.y <= b.x + b.y && a.x + a.y <= c.x + c.y -> 3
+            a.y <= b.y && a.y <= c.y -> 4
+            a.x >= b.x && a.x >= c.x -> 5
+            else -> 6
         }
+    for (radius in maxDist / 2..maxDist) for (j in 0..radius) {
+        val hexagon = when (sideA) {
+            1 -> Hexagon(HexPoint(a.x + j, a.y - radius), radius)
+            2 -> Hexagon(HexPoint(a.x + radius, a.y - radius + j), radius)
+            3 -> Hexagon(HexPoint(a.x + radius - j, a.y + j), radius)
+            4 -> Hexagon(HexPoint(a.x - j, a.y + radius), radius)
+            5 -> Hexagon(HexPoint(a.x - radius, a.y + radius - j), radius)
+            else -> Hexagon(HexPoint(a.x - radius + j, a.y - j), radius)
+        }
+
+        if (hexagon.isOnBorder(b) && hexagon.isOnBorder(c)) return hexagon
+
     }
     return null
 }
@@ -288,3 +335,4 @@ fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
  * Пример: 13, 32, 45, 18 -- шестиугольник радиусом 3 (с центром, например, в 15)
  */
 fun minContainingHexagon(vararg points: HexPoint): Hexagon = TODO()
+
