@@ -98,7 +98,7 @@ fun countSubstrings(inputName: String, substrings: List<String>): Map<String, In
             if (lineToLowerCase.contains(listString)) {
                 for (char in 0..line.length - listString.length) {
                     if (lineToLowerCase.substring(char, char + listString.length).contains(listString))
-                        loweredRes[listString] = loweredRes[listString]?.plus(1)
+                        loweredRes[listString] = loweredRes[listString]?.plus(1) ?: 0
                 }
             }
 
@@ -323,21 +323,21 @@ fun html(
     var j = 0
     while (j < formattedStr.length) {
         var replacement: String
-        val symbol = formattedStr[j].toString()
-        val nextSymbol = if (j + 1 < formattedStr.length) formattedStr[j + 1].toString()
+        val firstSymbol = formattedStr[j].toString()
+        val secondSymbol = if (j + 1 < formattedStr.length) formattedStr[j + 1].toString()
         else ""
-        val nextNextSymbol = if (j + 2 < formattedStr.length) formattedStr[j + 2].toString()
+        val thirdSymbol = if (j + 2 < formattedStr.length) formattedStr[j + 2].toString()
         else ""
 
 
-        if (openTags.containsKey(symbol + nextSymbol + nextNextSymbol)) {
-            replacement = symbol + nextSymbol + nextNextSymbol
+        if (openTags.containsKey(firstSymbol + secondSymbol + thirdSymbol)) {
+            replacement = firstSymbol + secondSymbol + thirdSymbol
             j += 2
-        } else if (openTags.containsKey(symbol + nextSymbol)) {
-            replacement = symbol + nextSymbol
+        } else if (openTags.containsKey(firstSymbol + secondSymbol)) {
+            replacement = firstSymbol + secondSymbol
             j++
-        } else if (openTags.containsKey(symbol)) {
-            replacement = symbol
+        } else if (openTags.containsKey(firstSymbol)) {
+            replacement = firstSymbol
         } else {
             j++
             continue
