@@ -131,12 +131,6 @@ class HexSegment(val begin: HexPoint, val end: HexPoint) {
         else Direction.UP_LEFT
     }
 
-    override fun equals(other: Any?) =
-        other is HexSegment && (begin == other.begin && end == other.end || end == other.begin && begin == other.end)
-
-    override fun hashCode() =
-        begin.hashCode() + end.hashCode()
-
     /**
      *Определяет направления кратчайшего пути для неправильного отрезка
      */
@@ -151,6 +145,14 @@ class HexSegment(val begin: HexPoint, val end: HexPoint) {
 
         else -> Pair(Direction.LEFT, Direction.UP_LEFT)
     }
+
+    override fun equals(other: Any?) =
+        other is HexSegment && (begin == other.begin && end == other.end || end == other.begin && begin == other.end)
+
+    override fun hashCode() =
+        begin.hashCode() + end.hashCode()
+
+
 }
 
 /**
@@ -334,4 +336,6 @@ fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
  * Пример: 13, 32, 45, 18 -- шестиугольник радиусом 3 (с центром, например, в 15)
  */
 fun minContainingHexagon(vararg points: HexPoint): Hexagon = TODO()
+
+
 
