@@ -3,6 +3,7 @@
 package lesson8.task1
 
 import kotlin.math.abs
+import kotlin.math.max
 
 /**
  * Точка (гекс) на шестиугольной сетке.
@@ -67,9 +68,7 @@ data class Hexagon(val center: HexPoint, val radius: Int) {
      * и другим шестиугольником B с центром в 26 и радиуоом 2 равно 2
      * (расстояние между точками 32 и 24)
      */
-    fun distance(other: Hexagon): Int =
-        if (center.distance(other.center) <= radius + other.radius) 0
-        else center.distance(other.center) - radius - other.radius
+    fun distance(other: Hexagon): Int = max(0, center.distance(other.center) - radius - other.radius)
 
     /**
      * Тривиальная (1 балл)
