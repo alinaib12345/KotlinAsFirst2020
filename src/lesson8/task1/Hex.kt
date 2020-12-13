@@ -81,18 +81,14 @@ data class Hexagon(val center: HexPoint, val radius: Int) {
     /**
      * Проверяет, содержится ли точка на границе
      */
-    fun isOnBorder(point: HexPoint): Boolean {
-        val directions = Direction.values().dropLast(1).toList()
-        val points = mutableSetOf<HexPoint>()
-        var currentPoint = center.move(Direction.DOWN_LEFT, radius)
-        for (direction in directions) {
-            for (i in 0 until radius) {
-                points.add(currentPoint)
-                currentPoint = currentPoint.move(direction, 1)
-            }
-        }
-        return point in points
-    }
+
+    fun isOnBorder(point: HexPoint): Boolean =
+        point.x == center.x + radius && point.y in center.y - radius..center.y ||
+                point.x == center.x - radius && point.y in center.y..center.y + radius ||
+                point.y == center.y + radius && point.x in center.x - radius..center.x ||
+                point.y == center.y - radius && point.x in center.x..center.x + radius ||
+                point.x + point.y == center.x + center.y + radius && point.y in center.y..center.y + radius ||
+                point.x + point.y == center.x + center.y - radius && point.y in center.y - radius..center.y
 
 }
 
@@ -260,7 +256,7 @@ fun pathBetweenHexes(from: HexPoint, to: HexPoint): List<HexPoint> {
     val validity = HexSegment(from, to).isValid()
     if (validity) {
         val direction = HexSegment(from, to).direction()
-        while (from != to) {
+        while (nextFrom != to) {
             result.add(nextFrom)
             nextFrom = nextFrom.move(direction, 1)
         }
@@ -299,7 +295,7 @@ fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
     if (a == b && b == c) return Hexagon(a, 0)
     val maxDist = maxOf(a.distance(b), a.distance(c), b.distance(c))
     val sideA =
-        when {
+        when { //Определяет, на какой стороне лежит точка а (начиная с самой верхней стороны против часовой стрелки)
             a.y >= b.y && a.y >= c.y -> 1
             a.x <= b.x && a.x <= c.x -> 2
             a.x + a.y <= b.x + b.y && a.x + a.y <= c.x + c.y -> 3
