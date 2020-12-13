@@ -300,7 +300,8 @@ fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
             a.x + a.y <= b.x + b.y && a.x + a.y <= c.x + c.y -> 3
             a.y <= b.y && a.y <= c.y -> 4
             a.x >= b.x && a.x >= c.x -> 5
-            else -> 6
+            a.x + a.y >= b.x + b.y && a.x + a.y >= c.x + c.y -> 6
+            else -> 0
         }
     for (radius in maxDist / 2..maxDist) for (j in 0..radius) {
         val hexagon = when (sideA) {
@@ -309,7 +310,8 @@ fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
             3 -> Hexagon(HexPoint(a.x + radius - j, a.y + j), radius)
             4 -> Hexagon(HexPoint(a.x - j, a.y + radius), radius)
             5 -> Hexagon(HexPoint(a.x - radius, a.y + radius - j), radius)
-            else -> Hexagon(HexPoint(a.x - radius + j, a.y - j), radius)
+            6 -> Hexagon(HexPoint(a.x - radius + j, a.y - j), radius)
+            else -> break
         }
 
         if (hexagon.isOnBorder(b) && hexagon.isOnBorder(c)) return hexagon
