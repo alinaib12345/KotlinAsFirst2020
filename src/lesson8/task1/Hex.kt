@@ -3,7 +3,6 @@
 package lesson8.task1
 
 import kotlin.math.abs
-import kotlin.math.max
 
 /**
  * Точка (гекс) на шестиугольной сетке.
@@ -68,7 +67,9 @@ data class Hexagon(val center: HexPoint, val radius: Int) {
      * и другим шестиугольником B с центром в 26 и радиуоом 2 равно 2
      * (расстояние между точками 32 и 24)
      */
-    fun distance(other: Hexagon): Int = max(0, center.distance(other.center) - radius - other.radius)
+    fun distance(other: Hexagon): Int =
+        if (center.distance(other.center) <= radius + other.radius) 0
+        else center.distance(other.center) - radius - other.radius
 
     /**
      * Тривиальная (1 балл)
@@ -291,18 +292,18 @@ fun pathBetweenHexes(from: HexPoint, to: HexPoint): List<HexPoint> {
  * Если все три точки совпадают, вернуть шестиугольник нулевого радиуса с центром в данной точке.
  */
 fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
-    if (a == b && b == c) return Hexagon(a, 0)
-    val maxDist = maxOf(a.distance(b), a.distance(c), b.distance(c))
+    if (setOf(a, b, c).size == 1) return Hexagon(a, 0)
+    val maxRadius = maxOf(a.distance(b), a.distance(c), b.distance(c))
     val sideForA = mutableSetOf<Int>()
-    when { //Определяет, на какой стороне ожет лежать точка а (начиная с самой верхней стороны против часовой стрелки)
-        a.y >= b.y && a.y >= c.y -> sideForA.add(0)
-        a.x <= b.x && a.x <= c.x -> sideForA.add(1)
-        a.x + a.y <= b.x + b.y && a.x + a.y <= c.x + c.y -> sideForA.add(2)
-        a.y <= b.y && a.y <= c.y -> sideForA.add(3)
-        a.x >= b.x && a.x >= c.x -> sideForA.add(4)
-        a.x + a.y >= b.x + b.y && a.x + a.y >= c.x + c.y -> sideForA.add(5)
-    }
-    for (radius in maxDist / 2..maxDist) for (j in 0..radius) {
+    //Определяет, на какой стороне может лежать точка а (начиная с самой верхней стороны против часовой стрелки)
+    if (a.y >= b.y && a.y >= c.y) sideForA.add(0)
+    if (a.x <= b.x && a.x <= c.x) sideForA.add(1)
+    if (a.x + a.y <= b.x + b.y && a.x + a.y <= c.x + c.y) sideForA.add(2)
+    if (a.y <= b.y && a.y <= c.y) sideForA.add(3)
+    if (a.x >= b.x && a.x >= c.x) sideForA.add(4)
+    if (a.x + a.y >= b.x + b.y && a.x + a.y >= c.x + c.y) sideForA.add(5)
+
+    for (radius in maxRadius / 2..maxRadius) for (j in 0..radius) {
         val hexagon = arrayOf(
             Hexagon(HexPoint(a.x + j, a.y - radius), radius),
             Hexagon(HexPoint(a.x + radius, a.y - radius + j), radius),
@@ -311,14 +312,11 @@ fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
             Hexagon(HexPoint(a.x - radius, a.y + radius - j), radius),
             Hexagon(HexPoint(a.x - radius + j, a.y - j), radius)
         )
-        for (k in sideForA) {
+        for (k in sideForA)
             if (hexagon[k].isOnBorder(b) && hexagon[k].isOnBorder(c)) return hexagon[k]
-        }
-
     }
     return null
 }
-
 
 /**
  * Очень сложная (20 баллов)
