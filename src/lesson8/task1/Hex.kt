@@ -83,11 +83,11 @@ data class Hexagon(val center: HexPoint, val radius: Int) {
      */
 
     fun isOnBorder(point: HexPoint): Boolean =
-        point.y == center.y - radius && point.x in center.x..center.x + radius ||
-                point.x == center.x + radius && point.y in center.y - radius..center.y ||
-                point.x + point.y == center.x + center.y + radius && point.y in center.y..center.y + radius ||
-                point.y == center.y + radius && point.x in center.x - radius..center.x ||
+        point.x == center.x + radius && point.y in center.y - radius..center.y ||
                 point.x == center.x - radius && point.y in center.y..center.y + radius ||
+                point.y == center.y + radius && point.x in center.x - radius..center.x ||
+                point.y == center.y - radius && point.x in center.x..center.x + radius ||
+                point.x + point.y == center.x + center.y + radius && point.y in center.y..center.y + radius ||
                 point.x + point.y == center.x + center.y - radius && point.y in center.y - radius..center.y
 
 }
@@ -261,8 +261,9 @@ fun pathBetweenHexes(from: HexPoint, to: HexPoint): List<HexPoint> {
             nextFrom = nextFrom.move(direction, 1)
         }
     } else {
-        val firstD = HexSegment(from, to).directionForInvalid().first
-        val secondD = HexSegment(from, to).directionForInvalid().second
+        val directionForInvalid = HexSegment(from, to).directionForInvalid()
+        val firstD = directionForInvalid.first
+        val secondD = directionForInvalid.second
         while (nextFrom.y != to.y && nextFrom.x + nextFrom.y != to.x + to.y && nextFrom.x != to.x) {
             result.add(nextFrom)
             nextFrom = nextFrom.move(firstD, 1)
@@ -304,16 +305,17 @@ fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
     if (a.x + a.y >= b.x + b.y && a.x + a.y >= c.x + c.y) sideForA.add(5)
 
     for (radius in maxRadius / 2..maxRadius) for (j in 0..radius) {
-        val hexagon = arrayOf(
-            Hexagon(HexPoint(a.x + j, a.y - radius), radius),
-            Hexagon(HexPoint(a.x + radius, a.y - radius + j), radius),
-            Hexagon(HexPoint(a.x + radius - j, a.y + j), radius),
-            Hexagon(HexPoint(a.x - j, a.y + radius), radius),
-            Hexagon(HexPoint(a.x - radius, a.y + radius - j), radius),
-            Hexagon(HexPoint(a.x - radius + j, a.y - j), radius)
+        val center = arrayOf(//Возможные варианты точки центра, в зависимости от положения точки а
+            HexPoint(a.x + j, a.y - radius),
+            HexPoint(a.x + radius, a.y - radius + j),
+            HexPoint(a.x + radius - j, a.y + j),
+            HexPoint(a.x - j, a.y + radius),
+            HexPoint(a.x - radius, a.y + radius - j),
+            HexPoint(a.x - radius + j, a.y - j)
         )
         for (k in sideForA)
-            if (hexagon[k].isOnBorder(b) && hexagon[k].isOnBorder(c)) return hexagon[k]
+            if (Hexagon(center[k], radius).isOnBorder(b) && Hexagon(center[k], radius).isOnBorder(c))
+                return Hexagon(center[k], radius)
     }
     return null
 }
