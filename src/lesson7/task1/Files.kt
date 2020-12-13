@@ -375,7 +375,7 @@ fun html(stack: Stack<String>, line: String,
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
     File(outputName).bufferedWriter().use {
         val stack = Stack<String>()
-        var flag = false //имеется ли пустая/ые строка/и перед началом абзаца
+        var flag = false //имеется ли пустая/ые строка/и в начале
         val regex = Regex("""\s*""")
         var emptinessCount = 0
         val openTags = mapOf("***" to "<b><i>", "**" to "<b>", "*" to "<i>", "~~" to "<s>")
