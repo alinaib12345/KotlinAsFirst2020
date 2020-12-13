@@ -82,11 +82,11 @@ data class Hexagon(val center: HexPoint, val radius: Int) {
      */
 
     fun isOnBorder(point: HexPoint): Boolean =
-        point.x == center.x + radius && point.y in center.y - radius..center.y ||
-                point.x == center.x - radius && point.y in center.y..center.y + radius ||
-                point.y == center.y + radius && point.x in center.x - radius..center.x ||
-                point.y == center.y - radius && point.x in center.x..center.x + radius ||
+        point.y == center.y - radius && point.x in center.x..center.x + radius ||
+                point.x == center.x + radius && point.y in center.y - radius..center.y ||
                 point.x + point.y == center.x + center.y + radius && point.y in center.y..center.y + radius ||
+                point.y == center.y + radius && point.x in center.x - radius..center.x ||
+                point.x == center.x - radius && point.y in center.y..center.y + radius ||
                 point.x + point.y == center.x + center.y - radius && point.y in center.y - radius..center.y
 
 }
