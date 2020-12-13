@@ -267,7 +267,7 @@ fun pathBetweenHexes(from: HexPoint, to: HexPoint): List<HexPoint> {
     } else {
         val firstD = HexSegment(from, to).directionForInvalid().first
         val secondD = HexSegment(from, to).directionForInvalid().second
-        while (!HexSegment(nextFrom, to).isValid()) {
+        while (nextFrom.y != to.y && nextFrom.x + nextFrom.y != to.x + to.y && nextFrom.x != to.x) {
             result.add(nextFrom)
             nextFrom = nextFrom.move(firstD, 1)
         }

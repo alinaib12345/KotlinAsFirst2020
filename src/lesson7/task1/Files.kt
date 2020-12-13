@@ -311,9 +311,12 @@ Suspendisse <s>et elit in enim tempus iaculis</s>.
  *
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
-fun html(stack: Stack<String>, line: String,
-         check: Int, closeTags: Map<String, String>,
-         openTags: Map<String, String>): String {
+fun html(
+    stack: Stack<String>, line: String, check: Int,
+    closeTags:
+    Map<String, String>,
+    openTags: Map<String, String>,
+): String {
     var formattedStr = if (check == 0) line
     else line.replace(Regex("""^((\s{4})*\*\s)"""), "").replace(Regex("""^((\s{4})*\d+\.\s)"""), "")
 
@@ -321,15 +324,17 @@ fun html(stack: Stack<String>, line: String,
     while (j < formattedStr.length) {
         var replacement: String
         val symbol = formattedStr[j].toString()
-        val secondSymbol = if (j + 1 < formattedStr.length) formattedStr[j + 1].toString()
+        val nextSymbol = if (j + 1 < formattedStr.length) formattedStr[j + 1].toString()
         else ""
-        val thirdSymbol = if (j + 2 < formattedStr.length) formattedStr[j + 2].toString()
+        val nextNextSymbol = if (j + 2 < formattedStr.length) formattedStr[j + 2].toString()
         else ""
-        if (openTags.containsKey(symbol + secondSymbol + thirdSymbol)) {
-            replacement = symbol + secondSymbol + thirdSymbol
+
+
+        if (openTags.containsKey(symbol + nextSymbol + nextNextSymbol)) {
+            replacement = symbol + nextSymbol + nextNextSymbol
             j += 2
-        } else if (openTags.containsKey(symbol + secondSymbol)) {
-            replacement = symbol + secondSymbol
+        } else if (openTags.containsKey(symbol + nextSymbol)) {
+            replacement = symbol + nextSymbol
             j++
         } else if (openTags.containsKey(symbol)) {
             replacement = symbol
@@ -375,7 +380,7 @@ fun html(stack: Stack<String>, line: String,
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
     File(outputName).bufferedWriter().use {
         val stack = Stack<String>()
-        var flag = false //имеется ли пустая/ые строка/и в начале
+        var flag = false //имеется ли непустая строка в начале
         val regex = Regex("""\s*""")
         var emptinessCount = 0
         val openTags = mapOf("***" to "<b><i>", "**" to "<b>", "*" to "<i>", "~~" to "<s>")
@@ -389,7 +394,7 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
             if (emptinessCount != 0 && flag) {
                 it.write("</p><p>")
             }
-            flag = false
+            flag = true
             emptinessCount = 0
             val check = 0
             it.write(html(stack, line, check, closeTags, openTags))
