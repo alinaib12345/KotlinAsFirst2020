@@ -345,11 +345,13 @@ fun html(stack: Stack<String>, line: String,
                 }
                 stack.lastElement() == "</i>" -> {
                     formattedStr = formattedStr.replaceFirst(replacement, "</i></b>")
-                    stack.pop().repeat(2)
+                    stack.pop()
+                    stack.pop()
                 }
                 stack.lastElement() == "</b>" -> {
                     formattedStr = formattedStr.replaceFirst(replacement, "</b></i>")
-                    stack.pop().repeat(2)
+                    stack.pop()
+                    stack.pop()
                 }
             }
         } else {
@@ -381,15 +383,14 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
         it.write("<html><body><p>")
         for (line in File(inputName).readLines()) {
             if (line.matches(regex)) {
-                flag = true
                 emptinessCount++
                 continue
             }
             if (emptinessCount != 0 && flag) {
                 it.write("</p><p>")
-                flag = false
-                emptinessCount = 0
             }
+            flag = false
+            emptinessCount = 0
             val check = 0
             it.write(html(stack, line, check, closeTags, openTags))
         }
