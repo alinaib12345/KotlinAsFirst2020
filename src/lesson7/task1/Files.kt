@@ -5,7 +5,6 @@ package lesson7.task1
 import lesson3.task1.digitNumber
 import java.io.File
 import java.util.*
-import kotlin.math.pow
 
 // Урок 7: работа с файлами
 // Урок интегральный, поэтому его задачи имеют сильно увеличенную стоимость
@@ -87,24 +86,23 @@ fun deleteMarked(inputName: String, outputName: String) {
  */
 fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> {
     val res = mutableMapOf<String, Int>()
-    val loweredRes = mutableMapOf<String, Int?>()
     val substringsSet = substrings.toSet()
     for (substring in substringsSet) {
-        loweredRes[substring.toLowerCase()] = 0
+        res[substring] = 0
     }
     File(inputName).forEachLine { line ->
         val lineToLowerCase = line.toLowerCase()
-        for (listString in loweredRes.keys) {
-            if (lineToLowerCase.contains(listString)) {
+        for (listString in res.keys) {
+            val listStringToLowerCase = listString.toLowerCase()
+            if (lineToLowerCase.contains(listStringToLowerCase)) {
                 for (char in 0..line.length - listString.length) {
-                    if (lineToLowerCase.substring(char, char + listString.length).contains(listString))
-                        loweredRes[listString] = loweredRes[listString]?.plus(1) ?: 0
+                    if (lineToLowerCase.substring(char, char + listString.length).contains(listStringToLowerCase))
+                        res[listString] = res[listString]?.plus(1) ?: 0
                 }
             }
 
         }
     }
-    for (str in substringsSet) res[str] = loweredRes[str.toLowerCase()]!!
     return res
 }
 
@@ -311,13 +309,12 @@ Suspendisse <s>et elit in enim tempus iaculis</s>.
  *
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
-fun html(
-    stack: Stack<String>, line: String, check: Int,
-    closeTags:
-    Map<String, String>,
-    openTags: Map<String, String>,
-): String {
-    var formattedStr = if (check == 0) line
+
+val openTags = mapOf("***" to "<b><i>", "**" to "<b>", "*" to "<i>", "~~" to "<s>")
+val closeTags = mapOf("***" to "</i></b>", "**" to "</b>", "*" to "</i>", "~~" to "</s>")
+
+fun stringHtmlFormat(stack: Stack<String>, line: String, check: Boolean): String {
+    var formattedStr = if (check) line
     else line.replace(Regex("""^((\s{4})*\*\s)"""), "").replace(Regex("""^((\s{4})*\d+\.\s)"""), "")
 
     var j = 0
@@ -328,8 +325,6 @@ fun html(
         else ""
         val thirdSymbol = if (j + 2 < formattedStr.length) formattedStr[j + 2].toString()
         else ""
-
-
         if (openTags.containsKey(firstSymbol + secondSymbol + thirdSymbol)) {
             replacement = firstSymbol + secondSymbol + thirdSymbol
             j += 2
@@ -380,24 +375,22 @@ fun html(
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
     File(outputName).bufferedWriter().use {
         val stack = Stack<String>()
-        var flag = false //имеется ли непустая строка в начале
+        var notEmpty = false
         val regex = Regex("""\s*""")
-        var emptinessCount = 0
-        val openTags = mapOf("***" to "<b><i>", "**" to "<b>", "*" to "<i>", "~~" to "<s>")
-        val closeTags = mapOf("***" to "</i></b>", "**" to "</b>", "*" to "</i>", "~~" to "</s>")
+        var emptyString = false
         it.write("<html><body><p>")
         for (line in File(inputName).readLines()) {
             if (line.matches(regex)) {
-                emptinessCount++
+                emptyString = true
                 continue
             }
-            if (emptinessCount != 0 && flag) {
+            if (emptyString && notEmpty) {
                 it.write("</p><p>")
             }
-            flag = true
-            emptinessCount = 0
-            val check = 0
-            it.write(html(stack, line, check, closeTags, openTags))
+            notEmpty = true
+            emptyString = false
+            val check = true
+            it.write(stringHtmlFormat(stack, line, check))
         }
         it.write("</p></body></html>")
     }
@@ -517,15 +510,13 @@ fun markdownToHtml(inputName: String, outputName: String) {
         val stack = Stack<String>()
         var idents = -1
         var emptiness = false
-        val openTags = mapOf("***" to "<b><i>", "**" to "<b>", "*" to "<i>", "~~" to "<s>")
-        val closeTags = mapOf("***" to "</i></b>", "**" to "</b>", "*" to "</i>", "~~" to "</s>")
         it.write("<html><body>")
         it.write("<p>")
         stack.push("</p>")
         val regex1 = Regex("""^((\s{4})*\*\s)""")
         val regex2 = Regex("""^((\s{4})*\d+\.\s)""")
         for (line in File(inputName).readLines()) {
-            val flag =
+            val listString =
                 line.contains(regex1) || line.contains(regex2)
             if (emptiness) {
                 it.write("<p>")
@@ -539,12 +530,12 @@ fun markdownToHtml(inputName: String, outputName: String) {
                 }
                 continue
             }
-            val check = 1
-            var formattedStr = html(stack, line, check, closeTags, openTags)
+            val check = false
+            var formattedStr = stringHtmlFormat(stack, line, check)
             var i = 0
             while (line[i] == ' ') i++
             formattedStr = " ".repeat(i) + formattedStr
-            if (flag) {
+            if (listString) {
                 when {
                     i > idents -> {
                         if (line[i] == '*') {
@@ -629,17 +620,26 @@ fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
  * Используемые пробелы, отступы и дефисы должны в точности соответствовать примеру.
  *
  */
+fun powForInt(x: Int, degree: Int): Int {
+    var res = 1
+    for (i in degree downTo 1) {
+        res *= x
+    }
+    return res
+}
+
 fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
     val writer = File(outputName).bufferedWriter()
     var numberOfDigits = digitNumber(lhv)
-    var firstValue = "0"
-    while (firstValue.toInt() < rhv && numberOfDigits != 0) {
+    var firstValueInt = 0
+    while (firstValueInt < rhv && numberOfDigits != 0) {
         numberOfDigits--
-        firstValue = (lhv / 10.0.pow(numberOfDigits)).toInt().toString()
+        firstValueInt = lhv / powForInt(10, numberOfDigits)
     }
+    var firstValue = firstValueInt.toString()
 
     var quotient = " ".repeat(numberOfDigits + 3) + (lhv / rhv).toString()
-    var spaces = if (firstValue.length == digitNumber(firstValue.toInt() / rhv * rhv)) 1
+    var spaces = if (digitNumber(firstValueInt) == digitNumber(firstValueInt / rhv * rhv)) 1
     else 0
     writer.write(" ".repeat(spaces) + "$lhv | $rhv")
     writer.newLine()
@@ -660,7 +660,7 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
         firstValue = if (numberOfDigits == 0)
             (firstValue.toInt() - nextValue).toString()
         else (firstValue.toInt() - nextValue).toString() +
-                ((lhv % 10.0.pow(numberOfDigits).toInt()) / 10.0.pow(numberOfDigits - 1).toInt()).toString()
+                ((lhv % powForInt(10, numberOfDigits)) / powForInt(10, numberOfDigits - 1)).toString()
         writer.write(" ".repeat(spaces) + firstValue)
         writer.newLine()
         numberOfDigits--
