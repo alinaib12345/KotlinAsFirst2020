@@ -20,6 +20,7 @@ package lesson12.task1
 class PhoneBook {
 
     private val phoneBook = hashMapOf<String, MutableSet<String>>()
+    private val phoneByName = hashMapOf<String, String>()
 
     /**
      * Добавить человека.
@@ -28,8 +29,7 @@ class PhoneBook {
      * (во втором случае телефонная книга не должна меняться).
      */
     fun addHuman(name: String): Boolean {
-        val find = phoneBook.containsKey(name)
-        return if (find) false
+        return if (phoneBook.containsKey(name)) false
         else {
             phoneBook.put(name, mutableSetOf())
             true
@@ -43,14 +43,14 @@ class PhoneBook {
      * и false, если человек с таким именем отсутствовал в телефонной книге
      * (во втором случае телефонная книга не должна меняться).
      */
-    fun removeHuman(name: String): Boolean {
-        val find = phoneBook.containsKey(name)
-        return if (!find) false
+    fun removeHuman(name: String): Boolean =
+        if (!phoneBook.containsKey(name)) false
         else {
+            for (phone in phoneBook[name]!!) phoneByName.remove(phone)
             phoneBook.remove(name)
             true
         }
-    }
+
 
     /**
      * Добавить номер телефона.
@@ -59,17 +59,16 @@ class PhoneBook {
      * либо у него уже был такой номер телефона,
      * либо такой номер телефона зарегистрирован за другим человеком.
      */
-    fun addPhone(name: String, phone: String): Boolean {
-        for (human in phoneBook.keys) {
-            if (phoneBook[human] != null && phoneBook[human]!!.contains(phone))
-                return false
+    fun addPhone(name: String, phone: String): Boolean =
+        when {
+            phoneByName.containsKey(phone) -> false
+            phoneBook.containsKey(name) -> {
+                phoneBook[name]?.add(phone)
+                phoneByName[phone] = name
+                true
+            }
+            else -> false
         }
-        return if (!phoneBook.containsKey(name)) false
-        else {
-            phoneBook[name]?.add(phone) ?: mutableSetOf(phone)
-            true
-        }
-    }
 
     /**
      * Убрать номер телефона.
@@ -77,49 +76,34 @@ class PhoneBook {
      * и false, если человек с таким именем отсутствовал в телефонной книге
      * либо у него не было такого номера телефона.
      */
-    fun removePhone(name: String, phone: String): Boolean {
-        return if (!phoneBook.containsKey(name) || phoneBook[name]?.contains(phone) == false) false
+    fun removePhone(name: String, phone: String): Boolean =
+        if (!phoneBook.containsKey(name) || phoneBook[name]?.contains(phone) == false) false
         else {
-            phoneBook[name]!!.remove(phone)
+            phoneBook[name]?.remove(phone)
+            phoneByName.remove(phone)
             true
         }
-    }
+
 
     /**
      * Вернуть все номера телефона заданного человека.
      * Если этого человека нет в книге, вернуть пустой список
      */
-    fun phones(name: String): Set<String> {
-        return if (phoneBook.containsKey(name)) phoneBook[name]?.toSet() ?: setOf()
-        else setOf()
-    }
+    fun phones(name: String): Set<String> = phoneBook[name] ?: setOf()
+
 
     /**
      * Вернуть имя человека по заданному номеру телефона.
      * Если такого номера нет в книге, вернуть null.
      */
-    fun humanByPhone(phone: String): String? {
-        for (name in phoneBook.keys) {
-            if (phoneBook[name] != null && phoneBook[name]!!.contains(phone)) return name
-        }
-        return null
-    }
+    fun humanByPhone(phone: String): String? = phoneByName[phone]
 
     /**
      * Две телефонные книги равны, если в них хранится одинаковый набор людей,
      * и каждому человеку соответствует одинаковый набор телефонов.
      * Порядок людей / порядок телефонов в книге не должен иметь значения.
      */
-    override fun equals(other: Any?): Boolean {
-        if (other !is PhoneBook || phoneBook.size != other.phoneBook.size) return false
-        for (name in phoneBook.keys) {
-            if (!other.phoneBook.containsKey(name) || phoneBook[name] != other.phoneBook[name])
-                return false
-        }
-        return true
-    }
+    override fun equals(other: Any?): Boolean = other is PhoneBook && phoneBook == other.phoneBook
 
     override fun hashCode(): Int = phoneBook.hashCode()
-
-
 }
