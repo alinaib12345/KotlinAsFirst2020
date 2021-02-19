@@ -13,8 +13,7 @@ import lesson1.task1.sqr
  *
  * Аргументы конструктора -- вещественная и мнимая часть числа.
  */
-class Complex(val re: Double, val im: Double) {
-
+class Complex(var re: Double, var im: Double) {
     /**
      * Конструктор из вещественного числа
      */
@@ -24,19 +23,8 @@ class Complex(val re: Double, val im: Double) {
      * Конструктор из строки вида x+yi
      */
     constructor(s: String) : this(
-
-        when {
-            s.matches(Regex("""^(-?\d+(\.\d+)*)([+-]\d+(\.\d+)*i)?$""")) ->
-                Regex("""^(-?\d+(\.\d+)*)""").find(s)!!.groupValues[1].toDouble()
-            s.matches(Regex("""^-?\d+(\.\d+)*i$""")) -> 0.0
-            else -> throw IllegalArgumentException("Illegal string format")
-        },
-        when {
-            s.matches(Regex("""^(-?\d+(\.\d+)*)?([+-]\d+(\.\d+)*i)$""")) ->
-                Regex("""([+-]\d+(\.\d+)*)i$""").find(s)!!.groupValues[1].toDouble()
-            s.matches(Regex("""^-?\d+(\.\d+)*$""")) -> 0.0
-            else -> throw IllegalArgumentException("Illegal string format")
-        }
+        Regex("""^(-?\d+(\.\d+)*)?(([+-]\d+(\.\d+)*)i)?$""").find(s)?.groupValues?.get(1)?.toDouble() ?: 0.0,
+        Regex("""^(-?\d+(\.\d+)*)?(([+-]\d+(\.\d+)*)i)?$""").find(s)?.groupValues?.get(4)?.toDouble() ?: 0.0
     )
 
     /**

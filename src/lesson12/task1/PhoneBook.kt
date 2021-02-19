@@ -28,14 +28,12 @@ class PhoneBook {
      * и false, если человек с таким именем уже был в телефонной книге
      * (во втором случае телефонная книга не должна меняться).
      */
-    fun addHuman(name: String): Boolean {
-        return if (phoneBook.containsKey(name)) false
+    fun addHuman(name: String): Boolean =
+        if (phoneBook.containsKey(name)) false
         else {
             phoneBook.put(name, mutableSetOf())
             true
         }
-
-    }
 
     /**
      * Убрать человека.
@@ -61,7 +59,7 @@ class PhoneBook {
      */
     fun addPhone(name: String, phone: String): Boolean =
         when {
-            phoneByName.containsKey(phone) -> false
+            phone in phoneByName -> false
             phoneBook.containsKey(name) -> {
                 phoneBook[name]?.add(phone)
                 phoneByName[phone] = name
