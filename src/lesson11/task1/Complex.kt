@@ -3,6 +3,7 @@
 package lesson11.task1
 
 import lesson1.task1.sqr
+import java.lang.IllegalArgumentException
 
 /**
  * Класс "комплексное число".
@@ -18,14 +19,6 @@ class Complex(var re: Double, var im: Double) {
      * Конструктор из вещественного числа
      */
     constructor(x: Double) : this(x, 0.0)
-
-    /**
-     * Конструктор из строки вида x+yi
-     */
-    constructor(s: String) : this(
-        Regex("""^(-?\d+(\.\d+)*)?(([+-]\d+(\.\d+)*)i)?$""").find(s)?.groupValues?.get(1)?.toDouble() ?: 0.0,
-        Regex("""^(-?\d+(\.\d+)*)?(([+-]\d+(\.\d+)*)i)?$""").find(s)?.groupValues?.get(4)?.toDouble() ?: 0.0
-    )
 
     /**
      * Сложение.
@@ -72,3 +65,14 @@ class Complex(var re: Double, var im: Double) {
         return result
     }
 }
+
+/**
+ * Функция преобразования из строки вида x+yi
+ */
+fun Complex(s: String): Complex {
+    val match = Regex("""^(-?\d+(\.\d+)*)?(([+-]\d+(\.\d+)*)i)?$""").find(s) ?: throw IllegalArgumentException()
+    val re = if (match.groupValues[1].isEmpty()) 0.0 else match.groupValues[1].toDouble()
+    val im = if (match.groupValues[4].isEmpty()) 0.0 else match.groupValues[4].toDouble()
+    return Complex(re, im)
+}
+
