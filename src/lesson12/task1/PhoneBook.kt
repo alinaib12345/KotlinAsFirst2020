@@ -29,7 +29,7 @@ class PhoneBook {
      * (во втором случае телефонная книга не должна меняться).
      */
     fun addHuman(name: String): Boolean =
-        if (phoneBook.containsKey(name)) false
+        if (name in phoneBook) false
         else {
             phoneBook.put(name, mutableSetOf())
             true
@@ -42,7 +42,7 @@ class PhoneBook {
      * (во втором случае телефонная книга не должна меняться).
      */
     fun removeHuman(name: String): Boolean =
-        if (!phoneBook.containsKey(name)) false
+        if (name !in phoneBook) false
         else {
             for (phone in phoneBook[name]!!) phoneByName.remove(phone)
             phoneBook.remove(name)
@@ -60,7 +60,7 @@ class PhoneBook {
     fun addPhone(name: String, phone: String): Boolean =
         when {
             phone in phoneByName -> false
-            phoneBook.containsKey(name) -> {
+            name in phoneBook -> {
                 phoneBook[name]?.add(phone)
                 phoneByName[phone] = name
                 true
@@ -75,7 +75,7 @@ class PhoneBook {
      * либо у него не было такого номера телефона.
      */
     fun removePhone(name: String, phone: String): Boolean =
-        if (!phoneBook.containsKey(name) || phoneBook[name]?.contains(phone) == false) false
+        if (name !in phoneBook || phone !in phoneByName) false
         else {
             phoneBook[name]?.remove(phone)
             phoneByName.remove(phone)
