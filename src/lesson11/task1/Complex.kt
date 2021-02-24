@@ -20,6 +20,19 @@ class Complex(var re: Double, var im: Double) {
      */
     constructor(x: Double) : this(x, 0.0)
 
+    companion object {
+        /**
+         * Функция преобразования из строки вида x+yi
+         */
+        fun toComplex(s: String): Complex {
+            val match = Regex("""^(-?\d+(\.\d+)*)?(([+-]\d+(\.\d+)*)i)?$""").find(s)
+                ?: throw IllegalArgumentException("Illegal string format")
+            val re = if (match.groupValues[1].isEmpty()) 0.0 else match.groupValues[1].toDouble()
+            val im = if (match.groupValues[4].isEmpty()) 0.0 else match.groupValues[4].toDouble()
+            return Complex(re, im)
+        }
+    }
+
     /**
      * Сложение.
      */
@@ -64,15 +77,8 @@ class Complex(var re: Double, var im: Double) {
         result = 31 * result + im.hashCode()
         return result
     }
+
 }
 
-/**
- * Функция преобразования из строки вида x+yi
- */
-fun Complex(s: String): Complex {
-    val match = Regex("""^(-?\d+(\.\d+)*)?(([+-]\d+(\.\d+)*)i)?$""").find(s) ?: throw IllegalArgumentException()
-    val re = if (match.groupValues[1].isEmpty()) 0.0 else match.groupValues[1].toDouble()
-    val im = if (match.groupValues[4].isEmpty()) 0.0 else match.groupValues[4].toDouble()
-    return Complex(re, im)
-}
+
 
